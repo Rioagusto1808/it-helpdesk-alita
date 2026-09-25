@@ -9,16 +9,16 @@
         <p class="page-lede">{{ $tickets->total() }} tiket sesuai filter</p>
     </div>
     @can('export', \App\Models\Ticket::class)
-        <a class="btn btn--secondary btn--sm" href="{{ route('admin.tickets.export', request()->query()) }}">Export CSV</a>
+        <a class="btn btn--secondary btn--sm" href="{{ route('admin.tickets.export', request()->query()) }}"><x-icon name="download" class="icon--sm" /> Export CSV</a>
     @endcan
 </header>
 
 <details class="filters" open data-collapse-mobile>
-    <summary class="filters-toggle">Filter dan urutan</summary>
+    <summary class="filters-toggle"><x-icon name="filter" class="icon--sm" /> Filter dan urutan</summary>
     <form class="filters-form" method="GET" action="{{ route('admin.tickets.index') }}">
         <div class="filters-search">
             <label class="field-label" for="cari">Cari</label>
-            <input class="input" type="search" id="cari" name="cari" value="{{ $filters['cari'] ?? '' }}" maxlength="100" placeholder="Nomor, nama, email, atau isi deskripsi">
+            <span class="input-wrap has-icon"><x-icon name="search" class="input-icon" /><input class="input" type="search" id="cari" name="cari" value="{{ $filters['cari'] ?? '' }}" maxlength="100" placeholder="Nomor, nama, email, atau isi deskripsi"></span>
         </div>
 
         <div class="filters-field">
@@ -106,7 +106,7 @@
                 <span>Hanya lewat SLA</span>
             </label>
             <a class="btn btn--ghost btn--sm" href="{{ route('admin.tickets.index') }}">Reset</a>
-            <button type="submit" class="btn btn--primary btn--sm">Terapkan</button>
+            <button type="submit" class="btn btn--primary btn--sm"><x-icon name="check" class="icon--sm" /> Terapkan</button>
         </div>
     </form>
 </details>
@@ -132,7 +132,7 @@
                     <td class="trow-no">
                         <a class="trow-link" href="{{ route('admin.tickets.show', $ticket) }}">{{ $ticket->ticket_no }}</a>
                         @if ($ticket->isOverdue())
-                            <span class="badge badge--sla">Lewat SLA</span>
+                            <span class="badge badge--sla badge--dot">Lewat SLA</span>
                         @endif
                     </td>
                     <td data-label="Pemohon">{{ $ticket->requester_name }}</td>

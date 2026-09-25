@@ -22,17 +22,19 @@
     document.querySelectorAll('[data-copy]').forEach((btn) => {
         const target = document.getElementById(btn.dataset.copy);
         const status = btn.parentElement.querySelector('[data-copy-status]');
-        const label = btn.textContent;
+        const label = btn.querySelector('[data-label]') || btn;
+        const original = label.textContent;
         btn.addEventListener('click', async () => {
             let message = 'Nomor disalin';
             try {
                 await navigator.clipboard.writeText(target.textContent.trim());
+                btn.classList.add('is-done');
             } catch {
                 message = 'Gagal menyalin, salin manual';
             }
-            btn.textContent = message;
+            label.textContent = message;
             if (status) status.textContent = message;
-            setTimeout(() => { btn.textContent = label; }, 2000);
+            setTimeout(() => { label.textContent = original; btn.classList.remove('is-done'); }, 2200);
         });
     });
 
@@ -51,18 +53,38 @@
         });
     };
 
+    /* ---------- Progres isian wajib ---------- */
+    const progress = document.querySelector('[data-form-progress]');
+    const updateProgress = () => {
+        if (!progress) return;
+        const required = [...form.querySelectorAll('[required]')].filter((el) => !el.disabled && el.type !== 'radio');
+        const categoryDone = !!form.querySelector('[name="category_id"]:checked');
+        const done = required.filter((el) => el.value.trim() !== '' && el.checkValidity()).length + (categoryDone ? 1 : 0);
+        const total = required.length + 1;
+        progress.hidden = false;
+        progress.querySelector('[data-form-progress-label]').textContent = `${done} dari ${total} terisi`;
+        progress.querySelector('[data-form-progress-fill]').style.setProperty('--p', String(done / total));
+        progress.classList.toggle('is-complete', done === total);
+    };
+
     form.addEventListener('change', (e) => {
-        if (!e.target.matches('[name="category_id"], select')) return;
-        syncBranches();
-        const other = e.target.closest('.branch')?.querySelector('.branch-other input');
-        if (e.target.matches('select') && other && !other.disabled) other.focus();
+        if (e.target.matches('[name="category_id"], select')) {
+            syncBranches();
+            const other = e.target.closest('.branch')?.querySelector('.branch-other input');
+            if (e.target.matches('select') && other && !other.disabled) other.focus();
+        }
+        updateProgress();
     });
+    form.addEventListener('input', updateProgress);
 
     /* ---------- Penghitung karakter ---------- */
     const fmt = new Intl.NumberFormat('id-ID');
     form.querySelectorAll('[data-char-count]').forEach((out) => {
         const field = document.getElementById(out.dataset.charCount);
-        const update = () => { out.textContent = `${fmt.format(field.value.length)} / ${fmt.format(field.maxLength)}`; };
+        const update = () => {
+            out.textContent = `${fmt.format(field.value.length)} / ${fmt.format(field.maxLength)}`;
+            out.classList.toggle('is-near', field.value.length > field.maxLength * 0.9);
+        };
         field.addEventListener('input', update);
         update();
     });
@@ -91,6 +113,7 @@
 
         const ok = fileInput.files[0];
         chip.hidden = !ok;
+        drop.classList.toggle('has-file', !!ok);
         if (ok) {
             chip.querySelector('[data-file-name]').textContent = ok.name;
             chip.querySelector('[data-file-size]').textContent = humanSize(ok.size);
@@ -121,12 +144,13 @@
 
     /* ---------- Cegah kirim dobel ---------- */
     const submit = form.querySelector('[data-submit]');
-    const submitLabel = submit.textContent;
+    const submitText = submit.querySelector('[data-label]') || submit;
+    const submitLabel = submitText.textContent;
     const resetSubmit = () => {
         delete form.dataset.sending;
         submit.disabled = false;
         submit.classList.remove('is-loading');
-        submit.textContent = submitLabel;
+        submitText.textContent = submitLabel;
     };
 
     form.addEventListener('submit', (e) => {
@@ -137,11 +161,12 @@
         form.dataset.sending = '1';
         submit.disabled = true;
         submit.classList.add('is-loading');
-        submit.textContent = submit.dataset.loadingLabel || 'Mengirim…';
+        submitText.textContent = submit.dataset.loadingLabel || 'Mengirim…';
     });
 
     // Kembali lewat tombol Back: halaman dari cache, tombol harus aktif lagi.
     window.addEventListener('pageshow', (e) => { if (e.persisted) resetSubmit(); });
 
     syncBranches();
+    updateProgress();
 })();

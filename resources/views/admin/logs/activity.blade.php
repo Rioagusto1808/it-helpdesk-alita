@@ -3,13 +3,13 @@
 @section('title', 'Audit log')
 
 @section('content')
-<header class="admin-head">
+<header class="admin-head rise">
     <h1 class="page-title">Audit log</h1>
     <p class="page-lede">Semua aksi yang mengubah data atau terkait keamanan. Hanya bisa dibaca.</p>
 </header>
 
 <details class="filters" open data-collapse-mobile>
-    <summary class="filters-toggle">Filter</summary>
+    <summary class="filters-toggle"><x-icon name="filter" class="icon--sm" /> Filter</summary>
     <form class="filters-form" method="GET" action="{{ route('admin.logs.activity') }}">
         <div class="filters-field">
             <label class="field-label" for="f-aksi">Aksi</label>
@@ -44,12 +44,12 @@
         </div>
         <div class="filters-actions">
             <a class="btn btn--ghost btn--sm" href="{{ route('admin.logs.activity') }}">Reset</a>
-            <button type="submit" class="btn btn--primary btn--sm">Terapkan</button>
+            <button type="submit" class="btn btn--primary btn--sm"><x-icon name="check" class="icon--sm" /> Terapkan</button>
         </div>
     </form>
 </details>
 
-<div class="table-card">
+<div class="table-card rise i-1">
     <table class="ticket-table">
         <thead>
             <tr><th scope="col">Waktu</th><th scope="col">Pelaku</th><th scope="col">Aksi</th><th scope="col">Subjek</th><th scope="col">IP</th><th scope="col">Detail</th></tr>

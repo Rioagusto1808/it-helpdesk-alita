@@ -11,17 +11,23 @@
     <link rel="stylesheet" href="{{ asset('css/tokens.css') }}?v={{ $v }}">
     <link rel="stylesheet" href="{{ asset('css/base.css') }}?v={{ $v }}">
     <link rel="stylesheet" href="{{ asset('css/public.css') }}?v={{ $v }}">
+    <script src="{{ asset('js/motion.js') }}?v={{ $v }}"></script>
 </head>
 <body>
-    <main class="container" id="konten">
-        <section class="card-narrow error-card" aria-labelledby="error-title">
-            <span class="error-code" aria-hidden="true">@yield('code')</span>
-            <h1 id="error-title" class="page-title">@yield('title')</h1>
-            <p class="page-lede">@yield('message')</p>
+    <main class="error-page" id="konten">
+        <div class="orbs" aria-hidden="true"><span class="orb orb--1"></span><span class="orb orb--2"></span><span class="orb orb--3"></span></div>
+        <div class="grid-dots" aria-hidden="true"></div>
+
+        <section class="card-narrow card card--accent rise" aria-labelledby="error-title">
+            <span class="error-code text-gradient" aria-hidden="true">@yield('code')</span>
+            <div>
+                <h1 id="error-title" class="page-title">@yield('title')</h1>
+                <p class="page-lede">@yield('message')</p>
+            </div>
             @hasSection('action')
                 @yield('action')
             @else
-                <a class="btn btn--primary" href="{{ url('/') }}">Kembali ke beranda</a>
+                <a class="btn btn--primary btn--block shine" href="{{ url('/') }}"><x-icon name="arrow-left" /> Kembali ke beranda</a>
             @endif
         </section>
     </main>

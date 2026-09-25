@@ -3,19 +3,19 @@
 @section('title', 'Masuk')
 
 @section('content')
-<div class="auth-head">
-    <h1 class="page-title">Masuk ke panel admin</h1>
-    <p class="page-lede">Khusus tim IT. Mau melapor kendala? <a href="{{ route('tickets.create') }}">Buat tiket</a> tanpa login.</p>
+<div class="auth-head rise">
+    <h1 class="auth-title">Selamat datang kembali</h1>
+    <p class="page-lede">Masuk ke panel admin. Mau melapor kendala? <a href="{{ route('tickets.create') }}">Buat tiket</a> tanpa login.</p>
 </div>
 
 @if (session('status'))
-    <div class="alert alert--info reveal-in" role="status">{{ session('status') }}</div>
+    <div class="alert alert--info reveal-in" role="status"><x-icon name="info" /> {{ session('status') }}</div>
 @endif
 
-<form class="stack" method="POST" action="{{ route('admin.login') }}">
+<form class="stack rise i-1" method="POST" action="{{ route('admin.login') }}">
     @csrf
-    <x-field name="email" type="email" label="Email" maxlength="150" autocomplete="username" required autofocus />
-    <x-field name="password" type="password" label="Password" autocomplete="current-password" required />
+    <x-field name="email" type="email" label="Email" icon="mail" maxlength="150" autocomplete="username" required autofocus />
+    <x-field name="password" type="password" label="Password" icon="lock" reveal autocomplete="current-password" required />
 
     <div class="auth-row">
         <label class="check">
@@ -25,6 +25,6 @@
         <a href="{{ route('admin.password.request') }}">Lupa password?</a>
     </div>
 
-    <button type="submit" class="btn btn--primary shine">Masuk</button>
+    <button type="submit" class="btn btn--primary btn--block shine">Masuk <x-icon name="arrow-right" class="btn-arrow" /></button>
 </form>
 @endsection

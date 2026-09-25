@@ -56,6 +56,14 @@ class User extends Authenticatable
         $query->where('role', UserRole::Admin)->where('is_active', true);
     }
 
+    /** Dua huruf untuk avatar, contoh "Rio Pratama" → "RP". */
+    public function initials(): string
+    {
+        $words = preg_split('/\s+/', trim($this->name)) ?: [];
+
+        return mb_strtoupper(implode('', array_map(fn (string $w): string => mb_substr($w, 0, 1), array_slice($words, 0, 2))));
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;

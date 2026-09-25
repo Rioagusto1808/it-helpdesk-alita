@@ -222,7 +222,7 @@ Ini "momen wow" di form.
 
 1. Hanya animasikan `transform`, `opacity`, `filter` ringan, dan custom property (`--angle`, `--mx`). Jangan animasikan `width`, `height`, `top`, `left`, `margin` (penyebab layout jank). Pengecualian: posisi pseudo-element dekoratif seperti `.shine`.
 2. Easing default `--ease-out`. Durasi interaksi 120–320ms; entrance maksimal 600ms.
-3. Anggaran per layar: maksimal **satu** animasi loop dekoratif (aurora ATAU glow-border yang aktif) + `.live-dot`. Admin: tidak ada aurora di halaman tabel/detail, hanya di header dashboard.
+3. Anggaran per layar: maksimal **satu** kelompok animasi loop dekoratif (aurora, ATAU `.orbs` di satu panel, ATAU glow-border yang aktif) + `.live-dot`. Loop dekoratif hanya boleh di hero form publik, panel seni login, header dashboard, dan halaman sukses/error. Halaman tabel dan detail admin: hanya entrance dan hover.
 4. `.rise` hanya saat halaman pertama dibuka, maksimal 6 elemen, tidak diulang saat polling.
 5. Animasi loop harus berhenti saat tab tidak aktif atau elemen tidak terlihat bila memakai JavaScript (`document.visibilityState`, `IntersectionObserver`). Animasi CSS loop cukup dibatasi jumlahnya.
 6. `prefers-reduced-motion: reduce` wajib mematikan semua loop, entrance, count-up, dan spotlight (sudah diatur di `tokens.css` dan `motion.js`; jangan dilawan).
@@ -249,6 +249,26 @@ Ini "momen wow" di form.
 ```
 
 Catatan CSP: atribut `style="--i: 1"` adalah inline style. Karena CSP melarang inline style, gunakan kelas `.i-1` sampai `.i-6` yang didefinisikan di CSS (`.i-1 { --i: 1; }`), atau atur `--i` lewat JavaScript. File demo boleh memakai inline style karena bukan halaman produksi.
+
+### 7.4 Tambahan desain v2
+
+Token baru (di akhir `:root`, token lama tidak berubah): `--r-xl`, `--sh-3`, `--sh-glow`, `--ease-spring`, `--glass`, `--glass-dark`, `--ink-3`, `--grad-ink` (sidebar dan panel gelap), `--grad-text` (judul `.text-gradient`, hanya teks besar ≥ `--fs-xl`).
+
+| Kelas / atribut | Efek | Dipakai di |
+| --- | --- | --- |
+| `.orbs` + `.orb--1..3`, `.grid-dots` | bola cahaya oranye melayang + pola titik | hero publik, panel login, header dashboard, halaman sukses/error |
+| `[data-tilt]` | kartu miring 3D mengikuti pointer (`--rx`/`--ry`) | kartu kategori |
+| `.btn` (otomatis) | riak `.ripple` saat klik | semua tombol |
+| `.toast` + `[data-toast-close]` | toast dengan tombol tutup + bar progres 5 detik; `--sticky` untuk error | `<x-flash/>` |
+| `<x-field reveal>` | tombol lihat/sembunyikan password | login, reset, profil, user |
+| `<x-field strength>` | `<meter>` kekuatan password | reset, profil |
+| `[data-confetti]`, `.draw-check` | konfeti sekali + centang tergambar | halaman sukses |
+| `[data-form-progress]` | bar "x dari n terisi" | form tiket |
+| `.stepper--0..3` | langkah status Baru → Diproses → Selesai → Ditutup | tracking |
+| `.stub` | kartu nomor tiket berbentuk karcis | halaman sukses |
+| `<x-icon name="…">` | ikon SVG garis 24px, `aria-hidden` | tombol, judul panel, meta |
+
+Layout admin: `.admin-content` memakai `grid-template-columns: minmax(0, 1fr)` agar tabel lebar tidak mendorong halaman keluar layar. `.split` (tabel + form) baru dua kolom mulai 1360px; di bawahnya form turun ke bawah tabel.
 
 ---
 

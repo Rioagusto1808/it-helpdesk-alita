@@ -1,7 +1,8 @@
-{{-- $live=false di tabel/detail admin: tanpa titik berdenyut (tidak ada efek loop di area kerja admin). --}}
+{{-- $live=false di tabel/detail admin: titik statis, tanpa denyut (tidak ada efek loop di area kerja admin). --}}
 @props(['status', 'live' => true])
-<span {{ $attributes->class(['badge', $status->badgeClass()]) }}>
-    @if ($live && $status === \App\Enums\TicketStatus::Diproses)
+@php($pulse = $live && $status === \App\Enums\TicketStatus::Diproses)
+<span {{ $attributes->class(['badge', $status->badgeClass(), 'badge--dot' => ! $pulse]) }}>
+    @if ($pulse)
         <span class="live-dot" aria-hidden="true"></span>
     @endif
     {{ $status->label() }}

@@ -12,31 +12,46 @@
     <link rel="stylesheet" href="{{ asset('css/tokens.css') }}?v={{ $v }}">
     <link rel="stylesheet" href="{{ asset('css/base.css') }}?v={{ $v }}">
     <link rel="stylesheet" href="{{ asset('css/public.css') }}?v={{ $v }}">
-    <script src="{{ asset('js/motion.js') }}?v={{ $v }}" defer></script>
+    {{-- Tanpa defer: memasang class "js" sebelum render agar animasi masuk tidak berkedip. --}}
+    <script src="{{ asset('js/motion.js') }}?v={{ $v }}"></script>
     @stack('scripts')
 </head>
-<body>
+<body class="public">
     <a class="skip-link" href="#konten">Lewati ke konten</a>
+    <div class="page-decor" aria-hidden="true"><span class="orb orb--1"></span><span class="orb orb--3"></span></div>
 
-    <header class="site-header">
+    <header class="site-header" data-sticky-header>
         <div class="container site-header-inner">
             <a class="brand" href="{{ route('tickets.create') }}" aria-label="IT Helpdesk Alita, buat tiket">
-                <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor"/>
-                    <path class="brand-mark-check" d="M8 12.5l2.5 2.5L16 9.5"/>
-                </svg>
+                <span class="brand-mark"><x-icon name="check" /></span>
                 <span><span class="brand-long">IT Helpdesk </span><strong>Alita</strong></span>
             </a>
             <nav class="site-nav" aria-label="Navigasi utama">
-                <a href="{{ route('tickets.create') }}" @if (request()->routeIs('tickets.*')) aria-current="page" @endif>Buat tiket</a>
-                <a href="{{ route('queue.index') }}" @if (request()->routeIs('queue.*')) aria-current="page" @endif>Lihat antrian</a>
+                <a href="{{ route('tickets.create') }}" @if (request()->routeIs('tickets.*')) aria-current="page" @endif>
+                    <x-icon name="plus" class="icon--sm nav-icon" /> Buat tiket
+                </a>
+                <a href="{{ route('queue.index') }}" @if (request()->routeIs('queue.*')) aria-current="page" @endif>
+                    <x-icon name="list" class="icon--sm nav-icon" /> Lihat antrian
+                </a>
             </nav>
         </div>
     </header>
 
-    <main id="konten" class="container">
+    <main id="konten" class="container site-main">
         @yield('content')
     </main>
+
+    <footer class="site-footer">
+        <div class="container site-footer-inner">
+            <p class="site-footer-brand"><strong>IT Helpdesk Alita</strong> · dikelola tim IT</p>
+            <nav class="site-footer-nav" aria-label="Tautan bawah">
+                <a href="{{ route('tickets.create') }}">Buat tiket</a>
+                <a href="{{ route('queue.index') }}">Lihat antrian</a>
+                <a href="{{ route('tracking.lookup') }}">Cari tiket</a>
+                <a href="{{ route('admin.login') }}">Masuk tim IT</a>
+            </nav>
+        </div>
+    </footer>
 
     <x-flash />
 </body>

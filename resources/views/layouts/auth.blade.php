@@ -12,23 +12,36 @@
     <link rel="stylesheet" href="{{ asset('css/tokens.css') }}?v={{ $v }}">
     <link rel="stylesheet" href="{{ asset('css/base.css') }}?v={{ $v }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v={{ $v }}">
+    <script src="{{ asset('js/motion.js') }}?v={{ $v }}"></script>
 </head>
-<body>
+<body class="auth">
     <div class="auth-shell">
-        <aside class="auth-art aurora aurora--dark" aria-hidden="true">
-            <div class="auth-art-inner">
-                <p class="auth-art-title">IT Helpdesk Alita</p>
-                <p class="auth-art-text">Panel tim IT untuk mengerjakan tiket, memantau antrian, dan menjaga setiap laporan terjawab.</p>
+        <aside class="auth-art" aria-hidden="true">
+            <div class="orbs"><span class="orb orb--1"></span><span class="orb orb--2"></span><span class="orb orb--3"></span></div>
+            <div class="grid-dots grid-dots--light"></div>
+
+            <span class="brand brand--light">
+                <span class="brand-mark"><x-icon name="check" /></span>
+                <span>IT Helpdesk <strong>Alita</strong></span>
+            </span>
+
+            <div class="auth-art-body">
+                <p class="auth-art-title">Pusat kendali <span>tim IT Alita.</span></p>
+                <p class="auth-art-text">Kerjakan tiket, pantau antrian, dan pastikan setiap laporan karyawan terjawab tepat waktu.</p>
+                <ul class="auth-features">
+                    <li><span class="auth-feature-icon"><x-icon name="bolt" /></span> Antrian dan dashboard real-time</li>
+                    <li><span class="auth-feature-icon"><x-icon name="mail" /></span> Email otomatis ke pemohon dan tim</li>
+                    <li><span class="auth-feature-icon"><x-icon name="shield" /></span> Audit log untuk setiap aksi</li>
+                </ul>
             </div>
+
+            <p class="auth-art-foot">Khusus tim IT. Pelapor tidak perlu login.</p>
         </aside>
 
         <main class="auth-panel" id="konten">
-            <div class="auth-card rise">
-                <a class="brand" href="{{ route('tickets.create') }}" aria-label="IT Helpdesk Alita, halaman buat tiket">
-                    <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
-                        <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor"/>
-                        <path class="brand-mark-check" d="M8 12.5l2.5 2.5L16 9.5"/>
-                    </svg>
+            <div class="auth-card">
+                <a class="brand auth-mobile-brand" href="{{ route('tickets.create') }}" aria-label="IT Helpdesk Alita, halaman buat tiket">
+                    <span class="brand-mark"><x-icon name="check" /></span>
                     <span>IT Helpdesk <strong>Alita</strong></span>
                 </a>
                 @yield('content')

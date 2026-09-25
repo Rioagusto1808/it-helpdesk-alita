@@ -86,6 +86,17 @@
     --dur-4: 600ms;  /* entrance halaman */
 
     --focus-ring: 0 0 0 3px var(--paper), 0 0 0 5px var(--brand-600);
+
+    /* v2 (redesain): tambahan, token di atas tidak berubah */
+    --r-xl: 28px;
+    --sh-3: 0 32px 64px -24px rgba(27, 31, 36, .28), 0 10px 24px -12px rgba(27, 31, 36, .12);
+    --sh-glow: 0 0 0 1px rgba(233, 117, 55, .22), 0 16px 40px -14px rgba(233, 117, 55, .5);
+    --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+    --glass: rgba(255, 255, 255, .72);
+    --glass-dark: rgba(27, 31, 36, .6);
+    --ink-3: #242931;       /* permukaan gelap sidebar/login */
+    --grad-ink: linear-gradient(160deg, #242931 0%, #1B1F24 55%, #16191D 100%);
+    --grad-text: linear-gradient(120deg, #B9501F 0%, #D8622A 45%, #8F3D18 100%); /* teks besar gradient, kontras ≥ 4.5:1 di putih */
 }
 
 /* ---------- 1. Aurora: latar gradient bergerak pelan (hero / header) ---------- */

@@ -3,17 +3,17 @@
 @section('title', 'Email log')
 
 @section('content')
-<header class="admin-head">
+<header class="admin-head rise">
     <h1 class="page-title">Email log</h1>
     <p class="page-lede">Setiap email tiket yang dikirim. Email yang gagal bisa dikirim ulang setelah pengaturan SMTP diperbaiki.</p>
 </header>
 
 @error('email')
-    <div class="alert alert--error reveal-in" role="alert">{{ $message }}</div>
+    <div class="alert alert--error reveal-in" role="alert"><x-icon name="alert" /> {{ $message }}</div>
 @enderror
 
 <details class="filters" open data-collapse-mobile>
-    <summary class="filters-toggle">Filter</summary>
+    <summary class="filters-toggle"><x-icon name="filter" class="icon--sm" /> Filter</summary>
     <form class="filters-form" method="GET" action="{{ route('admin.logs.email') }}">
         <div class="filters-field">
             <label class="field-label" for="f-status">Status</label>
@@ -35,12 +35,12 @@
         </div>
         <div class="filters-actions">
             <a class="btn btn--ghost btn--sm" href="{{ route('admin.logs.email') }}">Reset</a>
-            <button type="submit" class="btn btn--primary btn--sm">Terapkan</button>
+            <button type="submit" class="btn btn--primary btn--sm"><x-icon name="check" class="icon--sm" /> Terapkan</button>
         </div>
     </form>
 </details>
 
-<div class="table-card">
+<div class="table-card rise i-1">
     <table class="ticket-table">
         <thead>
             <tr><th scope="col">Waktu</th><th scope="col">Ke</th><th scope="col">Subjek</th><th scope="col">Tipe</th><th scope="col">Status</th><th scope="col">Percobaan</th><th scope="col"><span class="sr-only">Aksi</span></th></tr>
@@ -63,13 +63,13 @@
                         @endif
                     </td>
                     <td data-label="Tipe"><code class="code">{{ $log->type }}</code></td>
-                    <td data-label="Status"><span class="badge {{ $log->status->badgeClass() }}">{{ $log->status->label() }}</span></td>
+                    <td data-label="Status"><span class="badge badge--dot {{ $log->status->badgeClass() }}">{{ $log->status->label() }}</span></td>
                     <td data-label="Percobaan">{{ $log->attempts }}</td>
                     <td class="cell-actions">
                         @if ($log->status === \App\Enums\EmailStatus::Failed)
                             <form method="POST" action="{{ route('admin.logs.email.retry', $log) }}">
                                 @csrf
-                                <button type="submit" class="btn btn--secondary btn--sm">Kirim ulang</button>
+                                <button type="submit" class="btn btn--secondary btn--sm"><x-icon name="refresh" class="icon--sm" /> Kirim ulang</button>
                             </form>
                         @endif
                     </td>

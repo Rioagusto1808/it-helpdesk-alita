@@ -30,7 +30,8 @@
         const tr = template.content.firstElementChild.cloneNode(true);
         tr.dataset.ticket = row.ticket_no;
         tr.querySelectorAll('[data-field]').forEach((el) => { el.textContent = row[el.dataset.field] ?? '-'; });
-        tr.querySelector('[data-badge]').className = `badge ${row.status_badge}`;
+        tr.querySelector('[data-badge]').className = `badge badge--dot ${row.status_badge}`;
+        tr.querySelector('[data-pos-badge]').classList.toggle('is-top', row.position !== null && row.position <= 3);
         if (!known.has(row.ticket_no)) tr.classList.add('flash-new');
         return tr;
     };
