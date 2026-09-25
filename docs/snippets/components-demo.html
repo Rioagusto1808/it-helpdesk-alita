@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contoh komponen — Alita IT Helpdesk</title>
+<link rel="stylesheet" href="../../public/css/tokens.css">
+<!-- File ini hanya CONTOH VISUAL untuk agent dan tim. Style di bawah boleh inline karena bukan halaman produksi. -->
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);color:var(--ink);background:var(--canvas);line-height:1.55}
+  .wrap{max-width:1120px;margin:0 auto;padding:var(--sp-8) var(--sp-5)}
+  h2.demo{font-size:var(--fs-sm);color:var(--muted);font-weight:700;margin:var(--sp-10) 0 var(--sp-4)}
+  .hero{border-radius:var(--r-lg);padding:clamp(28px,5vw,56px);box-shadow:var(--sh-1)}
+  .hero h1{font-size:var(--fs-3xl);line-height:1.05;letter-spacing:-.03em;font-weight:800;margin:0 0 var(--sp-4);max-width:14ch}
+  .hero p{color:var(--muted);max-width:44ch;margin:0 0 var(--sp-6);font-size:1.05rem}
+  .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 var(--sp-6);border:0;border-radius:var(--r-sm);font:inherit;font-weight:700;cursor:pointer;text-decoration:none;transition:transform var(--dur-2) var(--ease-out),box-shadow var(--dur-2) var(--ease-out)}
+  .btn-primary{color:#fff;background:var(--grad-brand-strong);box-shadow:var(--sh-brand)}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-primary:active{transform:translateY(1px)}
+  .btn-ghost{background:var(--paper);color:var(--ink);border:1.5px solid var(--line)}
+  .btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+  .row{display:flex;gap:var(--sp-3);flex-wrap:wrap}
+  .cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3);max-width:560px}
+  .cat{display:block;position:relative;border-radius:var(--r-md);cursor:pointer}
+  .cat input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+  .cat-body{display:block;height:100%;padding:var(--sp-5);border:1.5px solid var(--line);border-radius:inherit;background:var(--paper);transition:background var(--dur-2)}
+  .cat:has(input:checked) .cat-body{background:var(--grad-brand-soft);border-color:transparent}
+  .cat-name{display:flex;align-items:center;gap:var(--sp-2);font-weight:800;font-size:var(--fs-lg)}
+  .tag{font-size:var(--fs-xs);font-weight:700;padding:2px 8px;border-radius:var(--r-pill)}
+  .tag-infra{color:var(--infra);background:var(--infra-soft)} .tag-pass{color:var(--pass);background:var(--pass-soft)}
+  .cat-desc{display:block;color:var(--muted);font-size:var(--fs-sm);margin-top:var(--sp-1)}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--sp-4)}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-5)}
+  .stat-label{color:var(--muted);font-size:var(--fs-sm);font-weight:500}
+  .stat-value{display:block;font-size:var(--fs-2xl);font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:var(--sp-1)}
+  .stat--brand{background:var(--grad-brand-deep);color:#fff;border-color:transparent}
+  .stat--brand .stat-label{color:rgba(255,255,255,.9)}
+  .stat--brand .stat-value{color:#fff}
+  .queue{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
+  .queue-head{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-4) var(--sp-5);border-bottom:1px solid var(--line);font-weight:700}
+  .queue-head small{color:var(--muted);font-weight:500;margin-left:auto}
+  .qrow{display:grid;grid-template-columns:56px 1.4fr 1fr auto;align-items:center;gap:var(--sp-4);padding:var(--sp-3) var(--sp-5);border-bottom:1px solid var(--line)}
+  .qrow:last-child{border-bottom:0}
+  .pos{font-weight:800;font-size:var(--fs-lg);font-variant-numeric:tabular-nums;color:var(--brand-700)}
+  .no{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .meta{color:var(--muted);font-size:var(--fs-sm)}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-xs);font-weight:700;padding:4px 10px;border-radius:var(--r-pill)}
+  .b-baru{color:var(--st-baru);background:var(--st-baru-bg)} .b-proses{color:var(--st-diproses);background:var(--st-diproses-bg)}
+  .b-tunggu{color:var(--st-menunggu);background:var(--st-menunggu-bg)} .b-selesai{color:var(--st-selesai);background:var(--st-selesai-bg)}
+  @media (max-width:640px){.qrow{grid-template-columns:32px minmax(0,1fr) auto;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4)}.no{font-size:var(--fs-sm)}.queue-head small{display:none}.qrow .meta-col{display:none}.cats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2 class="demo">Hero dengan aurora</h2>
+  <section class="hero aurora rise">
+    <h1>Ada kendala IT? Laporkan di sini.</h1>
+    <p>Tiket langsung masuk antrian tim IT, dan nomor tiketnya dikirim ke email kamu.</p>
+    <div class="row">
+      <a class="btn btn-primary shine" href="#">Buat tiket</a>
+      <a class="btn btn-ghost" href="#">Lihat antrian</a>
+    </div>
+  </section>
+
+  <h2 class="demo">Kartu kategori (border gradient berputar saat dipilih)</h2>
+  <div class="cats">
+    <label class="cat glow-border lift"><input type="radio" name="c" checked>
+      <span class="cat-body"><span class="cat-name">ITInfra <span class="tag tag-infra">Perangkat</span></span><span class="cat-desc">Laptop, printer, internet, email</span></span></label>
+    <label class="cat glow-border lift"><input type="radio" name="c">
+      <span class="cat-body"><span class="cat-name">ITPass <span class="tag tag-pass">Aplikasi</span></span><span class="cat-desc">Aplikasi dan modul sistem</span></span></label>
+  </div>
+
+  <h2 class="demo">Kartu statistik (count-up, spotlight)</h2>
+  <div class="stats">
+    <div class="stat stat--brand rise" style="--i:0"><span class="stat-label">Dalam antrian</span><span class="stat-value" data-count-to="12">0</span></div>
+    <div class="stat spotlight lift rise" style="--i:1"><span class="stat-label">Diproses</span><span class="stat-value" data-count-to="7">0</span></div>
+    <div class="stat spotlight lift rise" style="--i:2"><span class="stat-label">Menunggu</span><span class="stat-value" data-count-to="3">0</span></div>
+    <div class="stat spotlight lift rise" style="--i:3"><span class="stat-label">Selesai hari ini</span><span class="stat-value" data-count-to="18">0</span></div>
+  </div>
+
+  <h2 class="demo">Papan antrian (titik live, sorotan baris baru)</h2>
+  <div class="queue">
+    <div class="queue-head"><span class="live-dot" aria-hidden="true"></span> Antrian saat ini <small>Diperbarui otomatis</small></div>
+    <div class="qrow flash-new"><span class="pos">1</span><span><span class="no">IT-20260924-00042</span><br><span class="meta">ITInfra · Laptop</span></span><span class="meta meta-col">3 menit lalu</span><span class="badge b-baru">Baru</span></div>
+    <div class="qrow"><span class="pos">2</span><span><span class="no">IT-20260924-00039</span><br><span class="meta">ITPass · Others</span></span><span class="meta meta-col">18 menit lalu</span><span class="badge b-proses">Diproses</span></div>
+    <div class="qrow"><span class="pos">3</span><span><span class="no">IT-20260924-00035</span><br><span class="meta">ITInfra · Internet</span></span><span class="meta meta-col">41 menit lalu</span><span class="badge b-proses">Diproses</span></div>
+    <div class="qrow"><span class="pos">-</span><span><span class="no">IT-20260923-00031</span><br><span class="meta">ITInfra · Printer</span></span><span class="meta meta-col">kemarin</span><span class="badge b-tunggu">Menunggu</span></div>
+  </div>
+
+  <h2 class="demo">Skeleton saat memuat</h2>
+  <div class="stats"><div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div></div>
+</div>
+<script src="../../public/js/motion.js"></script>
+</body>
+</html>

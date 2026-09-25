@@ -1,0 +1,227 @@
+/* ==========================================================================
+   Alita IT Helpdesk — design tokens + motion utilities
+   Acuan: docs/FRONTEND_RULES.md. Jangan hardcode warna/ukuran di file lain;
+   selalu pakai variabel di bawah.
+   ========================================================================== */
+
+@property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+:root {
+    /* Brand: oranye Alita (#E97537 = theme color alita.id) */
+    --brand-50: #FEF4EE;
+    --brand-100: #FDE6D6;
+    --brand-200: #FACBAE;
+    --brand-300: #F5A77A;
+    --brand-400: #EF8C52;
+    --brand-500: #E97537;   /* warna brand: aksen, ikon, border aktif, grafik */
+    --brand-600: #D8622A;   /* focus ring, border aktif di atas putih (3.6:1) */
+    --brand-700: #B9501F;   /* tombol & link berteks (4.9:1 dengan putih) */
+    --brand-800: #8F3D18;
+    --brand-900: #5E2810;
+
+    --grad-brand: linear-gradient(135deg, #F59A5B 0%, #E97537 45%, #C2481A 100%);
+    --grad-brand-strong: linear-gradient(135deg, #B9501F 0%, #8F3D18 100%); /* aman untuk teks putih */
+    --grad-brand-deep: linear-gradient(135deg, #C2531B 0%, #8F3D18 100%);   /* latar kartu/banner berteks putih kecil */
+    --grad-brand-soft: linear-gradient(135deg, #FFF8F3 0%, #FDE6D6 100%);
+
+    /* Netral (abu-abu dingin, bukan krem) */
+    --ink: #1B1F24;
+    --ink-2: #343A42;
+    --muted: #5F6670;
+    --subtle: #8B929B;      /* hanya placeholder & ikon, bukan teks penting */
+    --line: #E3E5E9;
+    --line-strong: #CDD1D7;
+    --canvas: #F5F6F8;
+    --paper: #FFFFFF;
+
+    /* Tag kategori (kecil saja, bukan warna dominan) */
+    --infra: #2563A6;
+    --infra-soft: #E7EFF8;
+    --pass: #0F7A64;
+    --pass-soft: #E1F2EC;
+
+    /* Status tiket */
+    --st-baru: #1B1F24;        --st-baru-bg: #ECEEF1;
+    --st-diproses: #B9501F;    --st-diproses-bg: #FDE6D6;
+    --st-menunggu: #8A5A00;    --st-menunggu-bg: #FDF3E1;
+    --st-selesai: #1E7B34;     --st-selesai-bg: #E6F4EA;
+    --st-ditutup: #5F6670;     --st-ditutup-bg: #F5F6F8;
+    --danger: #B42318;         --danger-bg: #FDECEA;
+
+    /* Tipografi */
+    --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --fs-xs: .75rem;      /* 12 */
+    --fs-sm: .875rem;     /* 14 */
+    --fs-base: 1rem;      /* 16 */
+    --fs-lg: 1.25rem;     /* 20 */
+    --fs-xl: 1.75rem;     /* 28 */
+    --fs-2xl: clamp(2rem, 1.4rem + 2.4vw, 2.5rem);     /* 32–40 */
+    --fs-3xl: clamp(2.25rem, 1.5rem + 3.2vw, 3.25rem); /* 36–52 */
+
+    /* Spasi (grid 4px) */
+    --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
+    --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px; --sp-16: 64px;
+
+    /* Radius */
+    --r-sm: 8px;   /* input, tombol */
+    --r-md: 12px;  /* kartu */
+    --r-lg: 20px;  /* panel utama */
+    --r-pill: 999px;
+
+    /* Bayangan */
+    --sh-1: 0 1px 2px rgba(27, 31, 36, .06), 0 1px 1px rgba(27, 31, 36, .04);
+    --sh-2: 0 10px 24px -8px rgba(27, 31, 36, .14), 0 2px 6px rgba(27, 31, 36, .05);
+    --sh-brand: 0 12px 28px -10px rgba(233, 117, 55, .55);
+
+    /* Gerak */
+    --ease-out: cubic-bezier(.22, 1, .36, 1);
+    --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+    --dur-1: 120ms;  /* hover warna */
+    --dur-2: 200ms;  /* tombol, input */
+    --dur-3: 320ms;  /* kartu, panel muncul */
+    --dur-4: 600ms;  /* entrance halaman */
+
+    --focus-ring: 0 0 0 3px var(--paper), 0 0 0 5px var(--brand-600);
+}
+
+/* ---------- 1. Aurora: latar gradient bergerak pelan (hero / header) ---------- */
+.aurora {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--paper);
+}
+.aurora::before {
+    content: "";
+    position: absolute;
+    inset: -30%;
+    z-index: -1;
+    background:
+        radial-gradient(35% 40% at 15% 20%, rgba(245, 154, 91, .45), transparent 70%),
+        radial-gradient(30% 35% at 85% 15%, rgba(233, 117, 55, .30), transparent 70%),
+        radial-gradient(40% 45% at 70% 85%, rgba(250, 203, 174, .60), transparent 70%);
+    filter: blur(30px);
+    animation: aurora-drift 22s var(--ease-in-out) infinite alternate;
+}
+.aurora--dark { background: var(--ink); color: var(--paper); }
+.aurora--dark::before { opacity: .75; }
+@keyframes aurora-drift {
+    0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+    50%  { transform: translate3d(4%, -3%, 0) rotate(6deg); }
+    100% { transform: translate3d(-3%, 4%, 0) rotate(-5deg); }
+}
+
+/* ---------- 2. Border gradient berputar (kartu terpilih / aktif) ---------- */
+.glow-border { position: relative; }
+.glow-border::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: conic-gradient(from var(--angle), var(--brand-300), var(--brand-500), var(--brand-800), var(--brand-500), var(--brand-300));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-3) var(--ease-out);
+}
+.glow-border.is-active::after,
+.glow-border:has(input:checked)::after {
+    opacity: 1;
+    animation: angle-spin 4s linear infinite;
+}
+@keyframes angle-spin { to { --angle: 360deg; } }
+
+/* ---------- 3. Kartu terangkat saat hover (hanya perangkat dengan hover) ---------- */
+@media (hover: hover) {
+    .lift { transition: transform var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out); }
+    .lift:hover { transform: translateY(-3px); box-shadow: var(--sh-2); }
+}
+
+/* ---------- 4. Spotlight: cahaya mengikuti kursor (butuh motion.js) ---------- */
+.spotlight { position: relative; overflow: hidden; }
+.spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(233, 117, 55, .14), transparent 70%);
+    opacity: 0;
+    transition: opacity var(--dur-3) var(--ease-out);
+    pointer-events: none;
+}
+@media (hover: hover) { .spotlight:hover::before { opacity: 1; } }
+
+/* ---------- 5. Kilau pada tombol utama ---------- */
+.shine { position: relative; overflow: hidden; }
+.shine::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .35), transparent);
+    transform: skewX(-20deg);
+    pointer-events: none;
+}
+@media (hover: hover) { .shine:hover::after { animation: shine-sweep 700ms var(--ease-out); } }
+@keyframes shine-sweep { to { left: 130%; } }
+
+/* ---------- 6. Titik "live" berdenyut ---------- */
+.live-dot {
+    position: relative;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand-500);
+}
+.live-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--brand-500);
+    animation: live-ping 1.8s var(--ease-out) infinite;
+}
+@keyframes live-ping { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(3); opacity: 0; } }
+
+/* ---------- 7. Sorotan baris/kartu baru ---------- */
+.flash-new { animation: flash-new 2.4s var(--ease-out); }
+@keyframes flash-new { 0%, 30% { background-color: var(--brand-100); } 100% { background-color: transparent; } }
+
+/* ---------- 8. Skeleton shimmer ---------- */
+.skeleton {
+    border-radius: var(--r-sm);
+    background: linear-gradient(90deg, #ECEEF1 25%, #F7F8FA 37%, #ECEEF1 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+}
+@keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+/* ---------- 9. Entrance sekali saat halaman dibuka (stagger lewat --i) ---------- */
+.rise { animation: rise var(--dur-4) var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms); }
+/* CSP melarang style inline: pakai kelas ini untuk urutan stagger */
+.i-1 { --i: 1; } .i-2 { --i: 2; } .i-3 { --i: 3; } .i-4 { --i: 4; } .i-5 { --i: 5; } .i-6 { --i: 6; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* ---------- 10. Muncul saat field bersyarat ditampilkan ---------- */
+.reveal-in { animation: reveal-in var(--dur-2) var(--ease-out); }
+@keyframes reveal-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Wajib: hormati pengaturan kurangi gerakan ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .aurora::before, .glow-border::after, .live-dot::after, .skeleton { animation: none !important; }
+}
