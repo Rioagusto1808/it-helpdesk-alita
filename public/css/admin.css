@@ -1,0 +1,271 @@
+/* ==========================================================================
+   Alita IT Helpdesk — panel admin + halaman login
+   Dial taste: admin VARIANCE 3 / MOTION 4 / DENSITY 7; login 5 / 5 / 3.
+   Tidak ada efek loop di halaman tabel/detail; aurora hanya di header dashboard dan login.
+   ========================================================================== */
+
+/* ---------- Login, lupa password, reset ---------- */
+.auth-shell { display: grid; min-height: 100vh; }
+.auth-art { display: none; }
+.auth-panel { display: grid; place-items: center; padding: var(--sp-8) var(--sp-4); }
+.auth-card { display: grid; gap: var(--sp-6); width: 100%; max-width: 420px; }
+.auth-head .page-lede { margin-top: var(--sp-2); }
+.auth-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-sm); }
+.auth-row a, .auth-back { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-sm); font-weight: 700; }
+.auth-card .btn--primary { width: 100%; }
+.check { display: inline-flex; align-items: center; gap: var(--sp-2); min-height: 44px; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; accent-color: var(--brand-600); }
+
+@media (min-width: 768px) {
+    .auth-shell { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    .auth-art { display: flex; align-items: flex-end; padding: var(--sp-12) var(--sp-10); }
+    .auth-art-inner { position: relative; max-width: 36ch; }
+    .auth-art-title { font-size: var(--fs-3xl); font-weight: 800; line-height: 1.05; letter-spacing: -.03em; }
+    .auth-art-text { margin-top: var(--sp-4); color: var(--line); }
+}
+
+/* ---------- Kerangka admin: sidebar + konten ---------- */
+.admin-shell { min-height: 100vh; }
+.admin-main { min-width: 0; }
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    padding: var(--sp-4);
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+}
+.sidebar-brand { padding-inline: var(--sp-2); }
+.side-nav { display: grid; gap: var(--sp-1); }
+.side-link {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-height: 44px;
+    padding: 0 var(--sp-3);
+    border-radius: var(--r-sm);
+    color: var(--ink-2);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+.side-link:hover { background: var(--canvas); color: var(--ink); }
+.side-link[aria-current="page"] { background: var(--brand-50); color: var(--brand-700); }
+.side-link[aria-current="page"] .icon { stroke: var(--brand-600); }
+.side-public { margin-top: auto; padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); }
+
+.icon { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    min-height: 64px;
+    padding: var(--sp-2) var(--sp-4);
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+}
+.topbar-menu { display: none; }
+.topbar-user { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--sp-2); margin-left: auto; }
+.topbar-name { display: grid; margin-right: var(--sp-2); font-size: var(--fs-sm); font-weight: 700; line-height: 1.3; text-align: right; }
+.topbar-role { color: var(--muted); font-size: var(--fs-xs); font-weight: 500; }
+
+.admin-content { display: grid; gap: var(--sp-6); width: 100%; max-width: 1400px; margin-inline: auto; padding: var(--sp-6) var(--sp-4) var(--sp-12); }
+.admin-head .page-lede { margin-top: var(--sp-1); }
+
+.panel { min-width: 0; padding: var(--sp-5); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper); }
+.panel--narrow { max-width: 520px; }
+.dash-hero { padding: var(--sp-6); border-radius: var(--r-lg); box-shadow: var(--sh-1); }
+
+/* HP/tablet: sidebar menjadi drawer (butuh JS; tanpa JS menu tampil biasa di atas). */
+@media (max-width: 1023px) {
+    .js .topbar-menu { display: inline-flex; }
+    .js .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 30;
+        width: min(280px, 85vw);
+        overflow-y: auto;
+        box-shadow: var(--sh-2);
+        transform: translateX(-100%);
+        transition: transform var(--dur-3) var(--ease-out);
+    }
+    /* Drawer tertutup diberi atribut inert oleh admin.js: tidak bisa difokus dan tersembunyi dari pembaca layar. */
+    .js .sidebar.is-open { transform: none; }
+    .drawer-backdrop { position: fixed; inset: 0; z-index: 25; background: color-mix(in srgb, var(--ink) 40%, transparent); }
+    .drawer-backdrop[hidden] { display: none; }
+    .topbar-name { display: none; }
+}
+
+@media (min-width: 1024px) {
+    .admin-shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: var(--sp-5) var(--sp-4); }
+    .drawer-backdrop { display: none; }
+    .topbar { padding-inline: var(--sp-8); }
+    .admin-content { padding: var(--sp-8) var(--sp-8) var(--sp-16); }
+    .panel { padding: var(--sp-6); }
+    .dash-hero { padding: var(--sp-8); }
+}
+
+/* ---------- Umum admin ---------- */
+.admin-head--row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--sp-3); }
+.stack--sm { gap: var(--sp-4); }
+.subsection-title { margin-top: var(--sp-6); font-size: var(--fs-base); font-weight: 800; }
+.badge--sla { color: var(--danger); background: var(--danger-bg); }
+.btn--danger-text { color: var(--danger); }
+.btn--danger-text:hover { background: var(--danger-bg); }
+.input--file { padding: var(--sp-2); font-size: var(--fs-sm); }
+.back-link { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-sm); font-weight: 700; }
+.back-link::before { content: ""; width: 8px; height: 8px; margin-right: var(--sp-2); border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+
+/* ---------- Filter daftar tiket ---------- */
+.filters { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper); }
+.filters-toggle { min-height: 48px; padding: var(--sp-3) var(--sp-5); font-size: var(--fs-sm); font-weight: 700; cursor: pointer; }
+.filters-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--sp-4);
+    padding: 0 var(--sp-5) var(--sp-5);
+}
+.filters-form .field-label { display: block; margin-bottom: var(--sp-1); }
+.filters-form .input, .filters-form .select select { min-height: 40px; padding-block: var(--sp-2); font-size: var(--fs-sm); }
+.filters-search { grid-column: 1 / -1; }
+.filters-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--sp-3); }
+.filters-actions .check { margin-right: auto; font-size: var(--fs-sm); }
+
+/* ---------- Tabel tiket (kartu di ≤ 767px) ---------- */
+/* overflow: clip (bukan hidden) supaya header tabel tetap bisa sticky. */
+.table-card { overflow: clip; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper); }
+.ticket-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.ticket-table th {
+    position: sticky;
+    top: 64px;
+    z-index: 1;
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--line);
+    background: var(--canvas);
+    color: var(--muted);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+}
+.ticket-table td { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--line); vertical-align: top; }
+.trow { position: relative; }
+.trow:last-child td { border-bottom: 0; }
+@media (hover: hover) { .trow:hover td { background: var(--brand-50); } }
+.trow-link { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; text-decoration: none; }
+/* Seluruh baris bisa diklik, fokus keyboard tetap di link nomor tiket. */
+.trow-link::after { content: ""; position: absolute; inset: 0; }
+.trow-no .badge { margin-top: var(--sp-1); }
+.ticket-table time { white-space: nowrap; }
+.cell-main { display: block; font-weight: 500; }
+.cell-sub { display: block; color: var(--muted); font-size: var(--fs-xs); overflow-wrap: anywhere; }
+
+@media (max-width: 767px) {
+    .ticket-table thead { display: none; }
+    .ticket-table, .ticket-table tbody, .trow, .trow td { display: block; }
+    .trow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-2) var(--sp-4); padding: var(--sp-4); border-bottom: 1px solid var(--line); }
+    .trow:last-child { border-bottom: 0; }
+    .trow td { padding: 0; border: 0; }
+    .trow-no { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); font-size: var(--fs-base); }
+    .trow-no .badge { margin-top: 0; }
+    .trow td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: var(--fs-xs); }
+}
+
+.pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.pager-info { color: var(--muted); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.pager [aria-disabled="true"] { opacity: .5; pointer-events: none; }
+
+/* ---------- Detail tiket ---------- */
+.detail-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--sp-3); }
+.detail-label { color: var(--muted); font-size: var(--fs-sm); }
+.detail-no { font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.detail-badges { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+
+.detail-grid { display: grid; grid-template-areas: "info" "actions" "timeline"; gap: var(--sp-5); align-items: start; }
+.detail-info { grid-area: info; }
+.detail-actions { grid-area: actions; display: grid; gap: var(--sp-3); min-width: 0; }
+.detail-timeline { grid-area: timeline; }
+@media (min-width: 1024px) {
+    /* Baris 1 setinggi Informasi, sisanya untuk Timeline; panel aksi di kanan mengikuti scroll halaman. */
+    .detail-grid { grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto 1fr; grid-template-areas: "info actions" "timeline actions"; }
+}
+
+.info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--sp-4); margin-top: var(--sp-4); }
+.info-grid dt { color: var(--muted); font-size: var(--fs-xs); }
+.info-grid dd { margin-top: 2px; font-size: var(--fs-sm); font-weight: 700; overflow-wrap: anywhere; }
+
+.action-card { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper); }
+.action-title { font-size: var(--fs-sm); font-weight: 800; }
+.action-note { color: var(--muted); font-size: var(--fs-sm); }
+.action-note strong { color: var(--ink); }
+.action-inline { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.action-inline .select { flex: 1 1 160px; }
+.action-inline .select select { min-height: 44px; padding-block: var(--sp-2); font-size: var(--fs-sm); }
+.choice-group { display: flex; flex-wrap: wrap; gap: 0 var(--sp-5); }
+.choice-group legend { margin-bottom: var(--sp-1); }
+
+/* ---------- Dashboard ---------- */
+.dash-grid, .dash-tables { display: grid; gap: var(--sp-5); align-items: start; }
+.dash-side { display: grid; gap: var(--sp-4); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+.dash-avg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.dash-avg dt { color: var(--muted); font-size: var(--fs-xs); }
+.dash-avg dd { margin-top: 2px; font-size: var(--fs-lg); font-weight: 800; font-variant-numeric: tabular-nums; }
+.top-list { display: grid; gap: var(--sp-2); counter-reset: top; }
+.top-list li { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 1px solid var(--line); font-size: var(--fs-sm); }
+.top-list li:last-child { border-bottom: 0; }
+.top-list-total { color: var(--brand-700); font-weight: 800; font-variant-numeric: tabular-nums; }
+.ticket-table--compact td { padding-block: var(--sp-2); }
+.cell-pos { color: var(--brand-700); font-weight: 800; font-variant-numeric: tabular-nums; }
+@media (min-width: 1024px) {
+    .dash-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+
+}
+
+/* Grafik batang SVG (warna dari token, legenda berupa teks). */
+.chart { margin-top: var(--sp-4); }
+.chart-svg { width: 100%; height: auto; overflow: visible; }
+.chart-axis, .chart-grid { stroke: var(--line); stroke-width: 1; }
+.chart-grid { stroke-dasharray: 4 4; }
+.chart-label { fill: var(--muted); font-size: 12px; font-family: var(--font); }
+.chart-bar--infra { fill: var(--infra); }
+.chart-bar--apps { fill: var(--apps); }
+@media (hover: hover) { .chart-day:hover .chart-bar { opacity: .8; } }
+.chart-legend { display: flex; gap: var(--sp-5); margin-top: var(--sp-2); color: var(--muted); font-size: var(--fs-sm); }
+.chart-key { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.chart-key::before { content: ""; width: 12px; height: 12px; border-radius: 3px; }
+.chart-key--infra::before { background: var(--infra); }
+.chart-key--apps::before { background: var(--apps); }
+
+/* ---------- Master data, user, log ---------- */
+.split { display: grid; gap: var(--sp-5); align-items: start; }
+@media (min-width: 1024px) { .split { grid-template-columns: minmax(0, 1fr) 340px; } }
+.trow--muted td { color: var(--muted); }
+.trow--selected td { background: var(--brand-50); }
+.cell-actions { text-align: right; white-space: nowrap; }
+.cell-actions form { display: inline; }
+.code { padding: 2px var(--sp-1); border-radius: 4px; background: var(--canvas); font-size: var(--fs-xs); white-space: nowrap; }
+.json summary { color: var(--brand-700); font-size: var(--fs-xs); font-weight: 700; cursor: pointer; }
+.json pre { max-width: 420px; margin: var(--sp-2) 0 0; padding: var(--sp-3); overflow-x: auto; border-radius: var(--r-sm); background: var(--canvas); font-size: var(--fs-xs); white-space: pre-wrap; overflow-wrap: anywhere; }
+.badge--email-queued { color: var(--st-baru); background: var(--st-baru-bg); }
+.badge--email-sent { color: var(--st-selesai); background: var(--st-selesai-bg); }
+.badge--email-failed { color: var(--danger); background: var(--danger-bg); }
+@media (max-width: 767px) { .cell-actions { grid-column: 1 / -1; text-align: left; } }
+.split .panel > .section-title { margin-bottom: var(--sp-4); }
+
+/* HP: tabel ringkas dashboard jadi satu baris padat (posisi · nomor · status, jenis di bawah). */
+@media (max-width: 767px) {
+    .ticket-table--compact .trow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); }
+    .ticket-table--compact .trow td[data-label]::before { content: none; }
+    .ticket-table--compact .trow-no { width: auto; }
+    .ticket-table--compact td[data-label="Jenis"] { order: 5; flex-basis: 100%; color: var(--muted); font-size: var(--fs-xs); }
+    .ticket-table--compact td[data-label="Petugas"] { display: none; }
+}

@@ -28,6 +28,9 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
+    // Ditambahkan ke URL CSS/JS (?v=) untuk cache busting.
+    'asset_version' => env('APP_ASSET_VERSION', '1'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode
@@ -65,7 +68,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
 
     /*
     |--------------------------------------------------------------------------

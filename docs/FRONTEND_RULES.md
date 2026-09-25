@@ -60,7 +60,7 @@ Semua warna diambil dari variabel di `tokens.css`. **Dilarang menulis kode hex d
 | `--subtle` | #8B929B | placeholder, ikon non-esensial | teks yang harus dibaca |
 | `--line` / `--line-strong` | #E3E5E9 / #CDD1D7 | border, pemisah | |
 | `--canvas` / `--paper` | #F5F6F8 / #FFFFFF | latar halaman / kartu dan panel | |
-| `--infra` / `--pass` (+ `-soft`) | #2563A6 / #0F7A64 | tag kecil kategori saja | tombol, latar besar |
+| `--infra` / `--apps` (+ `-soft`) | #2563A6 / #0F7A64 | tag kecil kategori saja | tombol, latar besar |
 
 Aturan kontras (WCAG AA):
 
@@ -159,12 +159,12 @@ Setiap komponen yang dipakai lebih dari sekali dibuat sebagai Blade component di
 - Field bersyarat (Layanan/Modul/Others) muncul dengan kelas `.reveal-in`.
 - Upload: dropzone dengan border putus-putus; saat file diseret di atasnya, border `--brand-500` dan latar `--brand-50`. Setelah dipilih, tampil chip nama + ukuran + tombol Hapus.
 
-### 6.3 Kartu kategori (ITPass / ITInfra)
+### 6.3 Kartu kategori (ITApps / ITInfra)
 
 Ini "momen wow" di form.
 
 - Dua kartu radio besar berdampingan (bertumpuk di xs), kelas `.glow-border .lift`.
-- Isi: nama kategori (`--fs-lg`, 800), tag kecil (`.tag-infra` "Perangkat" / `.tag-pass` "Aplikasi"), deskripsi `--muted`.
+- Isi: nama kategori (`--fs-lg`, 800), tag kecil (`.tag-infra` "Perangkat" / `.tag-apps` "Aplikasi"), deskripsi `--muted`.
 - Terpilih: latar `--grad-brand-soft`, border gradient berputar (`.glow-border` aktif otomatis lewat `:has(input:checked)`), indikator radio terisi `--brand-600`.
 - Keyboard: panah kiri/kanan berpindah pilihan (perilaku radio native), fokus terlihat.
 
@@ -279,7 +279,7 @@ Catatan CSP: atribut `style="--i: 1"` adalah inline style. Karena CSP melarang i
 
 ### Dashboard admin
 - Header tipis `.aurora` (tinggi ±120px) berisi sapaan + tanggal.
-- Kartu statistik (satu `.stat--brand`), grafik batang SVG (batang `--brand-500`, hover `--brand-700`; ITPass/ITInfra memakai `--pass`/`--infra` dengan legenda teks), tabel antrian.
+- Kartu statistik (satu `.stat--brand`), grafik batang SVG (batang `--brand-500`, hover `--brand-700`; ITApps/ITInfra memakai `--apps`/`--infra` dengan legenda teks), tabel antrian.
 
 ### Daftar dan detail tiket admin
 - Tanpa efek loop. Fokus pada kepadatan informasi dan kecepatan.

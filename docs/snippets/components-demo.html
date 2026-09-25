@@ -28,7 +28,7 @@
   .cat:has(input:checked) .cat-body{background:var(--grad-brand-soft);border-color:transparent}
   .cat-name{display:flex;align-items:center;gap:var(--sp-2);font-weight:800;font-size:var(--fs-lg)}
   .tag{font-size:var(--fs-xs);font-weight:700;padding:2px 8px;border-radius:var(--r-pill)}
-  .tag-infra{color:var(--infra);background:var(--infra-soft)} .tag-pass{color:var(--pass);background:var(--pass-soft)}
+  .tag-infra{color:var(--infra);background:var(--infra-soft)} .tag-apps{color:var(--apps);background:var(--apps-soft)}
   .cat-desc{display:block;color:var(--muted);font-size:var(--fs-sm);margin-top:var(--sp-1)}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--sp-4)}
   .stat{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-5)}
@@ -68,7 +68,7 @@
     <label class="cat glow-border lift"><input type="radio" name="c" checked>
       <span class="cat-body"><span class="cat-name">ITInfra <span class="tag tag-infra">Perangkat</span></span><span class="cat-desc">Laptop, printer, internet, email</span></span></label>
     <label class="cat glow-border lift"><input type="radio" name="c">
-      <span class="cat-body"><span class="cat-name">ITPass <span class="tag tag-pass">Aplikasi</span></span><span class="cat-desc">Aplikasi dan modul sistem</span></span></label>
+      <span class="cat-body"><span class="cat-name">ITApps <span class="tag tag-apps">Aplikasi</span></span><span class="cat-desc">Aplikasi dan modul sistem</span></span></label>
   </div>
 
   <h2 class="demo">Kartu statistik (count-up, spotlight)</h2>
@@ -83,7 +83,7 @@
   <div class="queue">
     <div class="queue-head"><span class="live-dot" aria-hidden="true"></span> Antrian saat ini <small>Diperbarui otomatis</small></div>
     <div class="qrow flash-new"><span class="pos">1</span><span><span class="no">IT-20260924-00042</span><br><span class="meta">ITInfra · Laptop</span></span><span class="meta meta-col">3 menit lalu</span><span class="badge b-baru">Baru</span></div>
-    <div class="qrow"><span class="pos">2</span><span><span class="no">IT-20260924-00039</span><br><span class="meta">ITPass · Others</span></span><span class="meta meta-col">18 menit lalu</span><span class="badge b-proses">Diproses</span></div>
+    <div class="qrow"><span class="pos">2</span><span><span class="no">IT-20260924-00039</span><br><span class="meta">ITApps · Others</span></span><span class="meta meta-col">18 menit lalu</span><span class="badge b-proses">Diproses</span></div>
     <div class="qrow"><span class="pos">3</span><span><span class="no">IT-20260924-00035</span><br><span class="meta">ITInfra · Internet</span></span><span class="meta meta-col">41 menit lalu</span><span class="badge b-proses">Diproses</span></div>
     <div class="qrow"><span class="pos">-</span><span><span class="no">IT-20260923-00031</span><br><span class="meta">ITInfra · Printer</span></span><span class="meta meta-col">kemarin</span><span class="badge b-tunggu">Menunggu</span></div>
   </div>

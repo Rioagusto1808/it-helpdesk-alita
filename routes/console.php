@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+declare(strict_types=1);
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+use Illuminate\Support\Facades\Schedule;
+
+// Butuh cron tiap menit: * * * * * php /path/artisan schedule:run (lihat README).
+Schedule::command('helpdesk:auto-close')->dailyAt('01:00')->withoutOverlapping()->onOneServer();

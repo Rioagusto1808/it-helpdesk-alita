@@ -73,8 +73,8 @@ DESIGN_VARIANCE=6, MOTION_INTENSITY=7, VISUAL_DENSITY=4.
 
 Tampilan:
 - Warna utama oranye Alita dari public/css/tokens.css. Jika ada kode Tahap 1 berwarna biru/hijau, ganti ke token oranye.
-- Hero kiri memakai .aurora; kartu kategori ITPass/ITInfra memakai .glow-border .lift (momen wow halaman ini).
-- ITInfra → dropdown Layanan, ITPass → dropdown Modul, Others → input teks (.reveal-in).
+- Hero kiri memakai .aurora; kartu kategori ITApps/ITInfra memakai .glow-border .lift (momen wow halaman ini).
+- ITInfra → dropdown Layanan, ITApps → dropdown Modul, Others → input teks (.reveal-in).
 - Tombol Kirim tiket: primary + .shine. Responsif 360–1440px.
 - Template email HTML sesuai PRD, garis atas oranye.
 

@@ -41,8 +41,8 @@
     /* Tag kategori (kecil saja, bukan warna dominan) */
     --infra: #2563A6;
     --infra-soft: #E7EFF8;
-    --pass: #0F7A64;
-    --pass-soft: #E1F2EC;
+    --apps: #0F7A64;
+    --apps-soft: #E1F2EC;
 
     /* Status tiket */
     --st-baru: #1B1F24;        --st-baru-bg: #ECEEF1;

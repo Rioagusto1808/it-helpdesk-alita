@@ -210,8 +210,8 @@ flowchart LR
 
 | Kolom | Tipe | Aturan |
 | --- | --- | --- |
-| code | varchar(20) | unik: `ITPASS`, `ITINFRA` |
-| name | varchar(50) | `ITPass`, `ITInfra` |
+| code | varchar(20) | unik: `ITAPPS`, `ITINFRA` |
+| name | varchar(50) | `ITApps`, `ITInfra` |
 | description | varchar(150) | teks kecil di pilihan kategori |
 | timestamps | | |
 
@@ -228,7 +228,7 @@ flowchart LR
 
 Data awal: Laptop, Printer, Internet, Email, Others.
 
-### modules (khusus ITPass)
+### modules (khusus ITApps)
 
 | Kolom | Tipe | Aturan |
 | --- | --- | --- |
@@ -246,7 +246,7 @@ Data awal: Laptop, Printer, Internet, Email, Others.
 | category_id | FK categories | restrict on delete |
 | service_id | FK services | nullable, null on delete; wajib jika ITInfra |
 | service_other | varchar(100) | nullable; wajib jika service Others |
-| module_id | FK modules | nullable, null on delete; wajib jika ITPass |
+| module_id | FK modules | nullable, null on delete; wajib jika ITApps |
 | module_other | varchar(100) | nullable; wajib jika modul Others |
 | requester_name | varchar(100) | wajib |
 | requester_email | varchar(150) | wajib, index, disimpan lowercase |
@@ -403,10 +403,10 @@ Urutan field dari atas ke bawah:
 
 | Field | Input | Validasi server | Perilaku |
 | --- | --- | --- | --- |
-| Kategori | 2 pilihan kartu (radio) ITPass / ITInfra | wajib, ada di `categories` | menentukan field berikutnya; kartu terpilih memakai efek border gradient |
+| Kategori | 2 pilihan kartu (radio) ITApps / ITInfra | wajib, ada di `categories` | menentukan field berikutnya; kartu terpilih memakai efek border gradient |
 | Layanan | dropdown | wajib jika ITInfra, aktif, milik kategori ITInfra | hanya tampil jika ITInfra |
 | Layanan lainnya | teks | wajib jika layanan Others, maks 100 | muncul jika Others dipilih |
-| Modul | dropdown | wajib jika ITPass, aktif | hanya tampil jika ITPass |
+| Modul | dropdown | wajib jika ITApps, aktif | hanya tampil jika ITApps |
 | Modul lainnya | teks | wajib jika modul Others, maks 100 | muncul jika Others dipilih |
 | Nama | teks | wajib, maks 100 | `autocomplete=name` |
 | Email | email | wajib, `email:rfc`, maks 150, domain sesuai config jika diisi | disimpan lowercase |
@@ -426,7 +426,7 @@ Field yang tersembunyi dinonaktifkan di browser dan dikosongkan lagi di server. 
 
 - Ringkasan di atas: jumlah tiket berstatus baru, diproses, menunggu, dan selesai hari ini.
 - Tabel tiket aktif (baru, diproses, menunggu) diurutkan sesuai posisi antrian, kolom: Posisi, Nomor tiket, Kategori, Layanan/Modul, Status, Masuk ("12 menit lalu").
-- Filter kategori (Semua / ITPass / ITInfra) dan kotak cari nomor tiket; baris yang cocok disorot.
+- Filter kategori (Semua / ITApps / ITInfra) dan kotak cari nomor tiket; baris yang cocok disorot.
 - Diperbarui otomatis setiap 30 detik lewat `GET /antrian/data` (JSON), tanpa reload halaman. Polling berhenti saat tab tidak aktif.
 - Tidak pernah menampilkan nama, email, deskripsi, atau nama agent.
 - Maksimal 100 baris; jika lebih, tampilkan "dan N tiket lainnya".
@@ -462,7 +462,7 @@ Panel admin memakai `layouts/admin.blade.php`: sidebar kiri (Dashboard, Tiket, L
 
 - Kartu angka: Baru, Diproses, Menunggu, Selesai hari ini, Lewat SLA.
 - Rata-rata waktu respons pertama dan waktu penyelesaian 30 hari terakhir.
-- Grafik batang tiket masuk per hari (14 hari terakhir), dipisah ITPass dan ITInfra; digambar dengan SVG di server, tanpa library.
+- Grafik batang tiket masuk per hari (14 hari terakhir), dipisah ITApps dan ITInfra; digambar dengan SVG di server, tanpa library.
 - Jumlah tiket per layanan/modul 30 hari terakhir (5 teratas).
 - Tabel "Antrian saat ini" (10 teratas) dan "Tiket saya" untuk user yang login.
 - Diperbarui otomatis tiap 60 detik lewat `GET /admin/dashboard/data`.
@@ -627,7 +627,7 @@ Warna utama adalah oranye Alita `#E97537` (theme color situs alita.id), dipaduka
 | `--grad-brand` | #F59A5B → #E97537 → #C2481A (135°) | hero, kartu kategori terpilih, border beranimasi |
 | `--ink` / `--muted` | #1B1F24 / #5F6670 | teks utama / sekunder |
 | `--line` / `--canvas` / `--paper` | #E3E5E9 / #F5F6F8 / #FFFFFF | border / latar halaman / kartu |
-| `--infra` / `--pass` | #2563A6 / #0F7A64 | tag kategori ITInfra / ITPass (hanya badge kecil) |
+| `--infra` / `--apps` | #2563A6 / #0F7A64 | tag kategori ITInfra / ITApps (hanya badge kecil) |
 
 Animasi yang dipakai: latar gradient "aurora" yang bergerak pelan di hero, border gradient berputar pada kartu terpilih, kartu terangkat saat hover, efek kilau di tombol utama, titik "live" berdenyut di papan antrian, sorotan baris baru, angka dashboard yang menghitung naik, dan skeleton shimmer saat memuat. Semua memakai CSS (tanpa library), hanya menganimasikan `transform`, `opacity`, dan custom property, serta mati otomatis saat `prefers-reduced-motion`.
 
@@ -641,7 +641,7 @@ Setiap milestone dianggap selesai hanya jika `php artisan test`, `pint --test`, 
 
 | File | Yang diuji |
 | --- | --- |
-| `TicketSubmissionTest` | tiket ITInfra dan ITPass tersimpan; field cabang lain dikosongkan; Others wajib isi teks; lampiran tersimpan di disk privat; validasi gagal untuk file .exe dan > 5 MB; honeypot terisi ditolak; rate limit ke-6 dapat 429; nomor tiket berformat benar |
+| `TicketSubmissionTest` | tiket ITInfra dan ITApps tersimpan; field cabang lain dikosongkan; Others wajib isi teks; lampiran tersimpan di disk privat; validasi gagal untuk file .exe dan > 5 MB; honeypot terisi ditolak; rate limit ke-6 dapat 429; nomor tiket berformat benar |
 | `TicketEmailTest` | tiket baru mengirim ke semua email admin dan pemohon; `email_logs` tercatat `queued` lalu `sent`; job gagal menandai `failed` |
 | `QueuePositionTest` | urutan prioritas lalu waktu masuk; tiket menunggu/selesai tidak punya posisi |
 | `QueueBoardTest` | halaman dan JSON tidak mengandung nama, email, atau deskripsi |
@@ -658,7 +658,7 @@ Setiap milestone dianggap selesai hanya jika `php artisan test`, `pint --test`, 
 ### Acceptance criteria (uji manual)
 
 - [ ] Form bisa diisi dan dikirim dari HP (lebar 375px) tanpa scroll horizontal.
-- [ ] Memilih ITInfra memunculkan Layanan; memilih ITPass memunculkan Modul; Others memunculkan input teks.
+- [ ] Memilih ITInfra memunculkan Layanan; memilih ITApps memunculkan Modul; Others memunculkan input teks.
 - [ ] Email tiket baru masuk ke rio@alita.id dalam kurang dari 1 menit selama worker berjalan.
 - [ ] Pemohon menerima email konfirmasi dengan nomor tiket dan link tracking yang bisa dibuka.
 - [ ] Papan antrian ter-update sendiri dalam 30 detik setelah tiket baru masuk.
@@ -737,7 +737,7 @@ Kerjakan 8 milestone berurutan. Di akhir setiap milestone: jalankan test, Pint, 
 
 Semua poin di bawah sudah punya nilai default di PRD, jadi agent tetap bisa jalan; jawabannya cukup mengubah config atau seeder.
 
-- [ ] Daftar nama modul ITPass (default: hanya "Others").
+- [ ] Daftar nama modul ITApps (default: hanya "Others").
 - [ ] Apakah email pemohon dibatasi ke domain `alita.id` saja (default: semua domain boleh).
 - [ ] Layanan SMTP yang dipakai: Microsoft 365, Google Workspace, atau server mail kantor.
 - [ ] Target SLA per prioritas sudah sesuai atau perlu diubah.

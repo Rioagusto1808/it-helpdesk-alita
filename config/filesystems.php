@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Lampiran hanya diunduh lewat controller berotorisasi, tidak lewat route /storage bawaan.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

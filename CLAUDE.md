@@ -1,6 +1,6 @@
 # Alita IT Helpdesk — panduan untuk agent
 
-Aplikasi web Laravel untuk melapor kendala IT (ITPass → Module, ITInfra → Services), antrian transparan, dan panel admin tim IT. Pemohon tanpa login; admin/agent login. Database PostgreSQL. Email tiket baru ke `HELPDESK_ADMIN_EMAIL` (default rio@alita.id).
+Aplikasi web Laravel untuk melapor kendala IT (ITApps → Module, ITInfra → Services), antrian transparan, dan panel admin tim IT. Pemohon tanpa login; admin/agent login. Database PostgreSQL. Email tiket baru ke `HELPDESK_ADMIN_EMAIL` (default rio@alita.id).
 
 ## Sumber kebenaran (baca sesuai kebutuhan, jangan menebak)
 
@@ -13,7 +13,6 @@ Aplikasi web Laravel untuk melapor kendala IT (ITPass → Module, ITInfra → Se
 | `docs/snippets/components-demo.html` | contoh visual komponen | saat membuat komponen UI |
 | `docs/PROMPTS.md` | prompt per milestone | untuk manusia; agent cukup mengikuti PRD |
 | `SETUP.md` | instalasi lokal (PostgreSQL, Laragon, Claude Code) | saat menyiapkan environment |
-| `_referensi/tahap1/` | kode lama, hanya contoh (lihat `CATATAN.md`) | saat M2, lalu boleh dihapus |
 
 Urutan prioritas jika bertentangan: keamanan & aksesibilitas → file RULES → PRD → skill.
 
