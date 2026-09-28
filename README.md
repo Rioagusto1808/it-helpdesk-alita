@@ -12,10 +12,10 @@ Spesifikasi lengkap: [docs/PRD.md](docs/PRD.md). Aturan kode: [docs/BACKEND_RULE
 
 | Komponen | Pilihan |
 | --- | --- |
-| Bahasa / framework | PHP 8.2+ (diuji di 8.5), Laravel 12 |
+| Bahasa / framework | PHP 8.4+ (diuji di 8.4 dan 8.5), Laravel 12 |
 | Database | PostgreSQL 16+ (minimal 15) |
 | Tampilan | Blade + CSS + JavaScript vanilla di `public/`, **tanpa npm/Vite/build step** |
-| Queue | driver `database`, worker dijalankan Supervisor |
+| Queue | driver `database`, worker dijalankan systemd (`deploy/systemd`) |
 | Scheduler | `php artisan schedule:run` via cron tiap menit |
 | Kualitas | PHPUnit (PostgreSQL), Laravel Pint, Larastan level 6 |
 
@@ -31,13 +31,13 @@ php artisan migrate --seed    # master data + 30 tiket contoh (hanya di APP_ENV=
 php artisan helpdesk:make-admin
 ```
 
-Jalankan dalam tiga terminal:
+Jalankan web, queue worker (pengirim email), dan scheduler sekaligus:
 
 ```bash
-php artisan serve             # http://localhost:8000
-php artisan queue:work --tries=3
-php artisan schedule:work     # auto-close tiket (pengganti cron di lokal)
+composer run dev              # http://localhost:8000 + queue:listen + schedule:work
 ```
+
+Tanpa queue worker, email hanya menumpuk di antrian dan tidak pernah terkirim.
 
 Selama `MAIL_MAILER=log`, email tidak benar-benar dikirim, tapi ditulis ke `storage/logs/laravel.log`.
 
@@ -46,9 +46,10 @@ Selama `MAIL_MAILER=log`, email tidak benar-benar dikirim, tapi ditulis ke `stor
 | Variabel | Contoh | Keterangan |
 | --- | --- | --- |
 | `APP_ENV` / `APP_DEBUG` | `production` / `false` | **Wajib** `false` di production |
-| `APP_URL` | `https://helpdesk.alita.id` | Dipakai di link email dan signed URL tracking |
+| `APP_URL` | `https://ticketing.alita.id` | Dipakai di link email dan signed URL tracking |
 | `APP_TIMEZONE` / `APP_LOCALE` | `Asia/Jakarta` / `id` | |
-| `APP_ASSET_VERSION` | `1` | Naikkan setiap kali CSS/JS berubah agar cache browser diperbarui |
+| `APP_ASSET_VERSION` | `1` | Versi cache CSS/JS. Di production diisi otomatis dengan hash commit oleh `deploy.sh` |
+| `TRUSTED_PROXIES` | `10.0.5.1` | IP WAF/reverse proxy di depan aplikasi (production). Kosong di lokal |
 | `DB_*` | `pgsql`, `alita_helpdesk`, `alita` | Database PostgreSQL |
 | `SESSION_SECURE_COOKIE` | `true` | **Wajib** `true` di production (HTTPS) |
 | `QUEUE_CONNECTION` | `database` | |
@@ -61,106 +62,37 @@ Selama `MAIL_MAILER=log`, email tidak benar-benar dikirim, tapi ditulis ke `stor
 
 Target SLA per prioritas ada di `config/helpdesk.php` (dalam menit, jam kalender).
 
-Contoh SMTP Microsoft 365:
+SMTP production (SSL port 465):
 
 ```dotenv
 MAIL_MAILER=smtp
-MAIL_SCHEME=null
-MAIL_HOST=smtp.office365.com
-MAIL_PORT=587
-MAIL_USERNAME=helpdesk@alita.id
-MAIL_PASSWORD=isi-password-aplikasi
-MAIL_FROM_ADDRESS="helpdesk@alita.id"
+MAIL_SCHEME=smtps
+MAIL_HOST=mail.alita-indonesia.com
+MAIL_PORT=465
+MAIL_USERNAME=aibas.notification@alita.id
+MAIL_PASSWORD="isi-password"        # tanda kutip wajib jika ada # atau @
+MAIL_FROM_ADDRESS=aibas.notification@alita.id
 ```
+
+Untuk STARTTLS port 587, pakai `MAIL_SCHEME=null`. `MAIL_ENCRYPTION` tidak dipakai lagi di Laravel 12.
 
 Rahasia (password DB dan SMTP) hanya disimpan di `.env`, dan `.env` tidak pernah di-commit.
 
-## Deploy ke server
+## Deploy (CI/CD)
 
-Kebutuhan server: PHP 8.2+ dengan ekstensi `pdo_pgsql`, `pgsql`, `mbstring`, `intl`, `fileinfo`, `openssl`; PostgreSQL; Composer; Nginx atau Apache dengan document root ke folder `public/`; HTTPS.
+Production: **https://ticketing.alita.id** di server internal 10.0.5.186 (di belakang WAF Sophos).
 
-```bash
-git clone <repo> /var/www/alita-helpdesk && cd /var/www/alita-helpdesk
-composer install --no-dev --optimize-autoloader
-cp .env.example .env            # isi nilai production (tabel di atas)
-php artisan key:generate
-php artisan migrate --force
-php artisan db:seed --class=HelpdeskSeeder --force   # hanya master data, tanpa tiket contoh
-php artisan helpdesk:make-admin                        # admin pertama, password diketik interaktif
+- Setiap push dan pull request menjalankan `.github/workflows/ci-cd.yml`: Pint, PHPStan, dan semua test dengan PostgreSQL.
+- Push ke `main` yang lolos test otomatis di-deploy oleh self-hosted runner di server (`deploy/deploy.sh`): rilis atomik, migrasi, cache, `queue:restart`, health check `/up`, dan rollback otomatis jika gagal.
+- Server butuh PHP 8.4 (`php8.4-fpm`, `pdo_pgsql`, `mbstring`, `intl`, `xml`, `curl`, `zip`), Composer 2, PostgreSQL, nginx.
 
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
-```
+Setup server sekali jalan (user deploy, database, `.env`, nginx, queue worker, cron, runner, WAF) ada di **[DEPLOY.md](DEPLOY.md)**. File konfigurasi siap pakai ada di folder `deploy/`.
 
 Lampiran disimpan privat di `storage/app/private` dan hanya bisa diunduh lewat aplikasi (panel admin atau signed URL pemohon). **Jangan** menjalankan `php artisan storage:link`: aplikasi ini tidak butuh folder penyimpanan publik.
 
-Di production aplikasi memaksa skema `https` untuk semua URL yang dibuatnya. Link tracking memakai tanda tangan relatif (path + query), jadi tetap valid di balik proxy HTTPS.
+Link tracking memakai tanda tangan relatif (path + query), jadi tetap valid di balik proxy HTTPS. IP proxy didaftarkan lewat `TRUSTED_PROXIES` (lihat [DEPLOY.md](DEPLOY.md#8-waf-sophos)).
 
-**Kalau server berada di balik reverse proxy atau load balancer**, daftarkan IP proxy di `bootstrap/app.php`, misalnya `$middleware->trustProxies(at: ['10.0.0.10']);`. Tanpa itu, semua pemohon terlihat berasal dari IP proxy: rate limit per IP (5 tiket per menit) jadi berlaku untuk seluruh kantor sekaligus, dan IP di audit log tidak akurat.
-
-### Cron (scheduler)
-
-Satu baris crontab untuk user web server:
-
-```cron
-* * * * * cd /var/www/alita-helpdesk && php artisan schedule:run >> /dev/null 2>&1
-```
-
-Terjadwal: `helpdesk:auto-close` setiap hari pukul 01.00 (Asia/Jakarta). Perintah ini bisa juga dijalankan manual kapan saja.
-
-### Supervisor (queue worker)
-
-Semua email dikirim oleh worker. Tanpa worker, email berhenti di status "Antri". Contoh `/etc/supervisor/conf.d/alita-helpdesk-worker.conf`:
-
-```ini
-[program:alita-helpdesk-worker]
-process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/alita-helpdesk/artisan queue:work database --sleep=3 --tries=3 --max-time=3600
-directory=/var/www/alita-helpdesk
-user=www-data
-numprocs=1
-autostart=true
-autorestart=true
-stopasgroup=true
-killasgroup=true
-stopwaitsecs=3600
-redirect_stderr=true
-stdout_logfile=/var/www/alita-helpdesk/storage/logs/worker.log
-```
-
-```bash
-sudo supervisorctl reread && sudo supervisorctl update && sudo supervisorctl start "alita-helpdesk-worker:*"
-```
-
-Email yang gagal dicoba ulang otomatis 3 kali (jeda 1 menit, lalu 5 menit). Kalau tetap gagal, status di **Email log** menjadi "Gagal". Setelah SMTP diperbaiki, tekan **Kirim ulang** di halaman tersebut.
-
-### Update aplikasi
-
-```bash
-php artisan down
-git pull
-composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-php artisan config:cache && php artisan route:cache && php artisan view:cache
-php artisan queue:restart       # worker memuat kode baru
-php artisan up
-```
-
-Naikkan `APP_ASSET_VERSION` di `.env` (lalu `php artisan config:cache`) kalau ada perubahan CSS/JS.
-
-### Backup
-
-Backup database harian di luar aplikasi, misalnya:
-
-```cron
-0 2 * * * pg_dump -U alita -Fc alita_helpdesk > /backup/alita_helpdesk_$(date +\%F).dump
-```
-
-Ikut sertakan folder `storage/app/private` (lampiran) dalam backup file.
+Email dikirim oleh queue worker. Tanpa worker, email berhenti di status "Antri". Email yang gagal dicoba ulang otomatis 3 kali; jika tetap gagal, statusnya "Gagal" di **Email log** dan bisa dikirim ulang setelah SMTP diperbaiki.
 
 ## Admin dan user
 
@@ -197,11 +129,11 @@ Aturan singkat:
 
 | Gejala | Penyebab / solusi |
 | --- | --- |
-| Email tidak pernah terkirim, status "Antri" | Worker tidak jalan: cek `supervisorctl status` |
+| Email tidak pernah terkirim, status "Antri" | Worker tidak jalan: lokal `composer run dev`, server `systemctl status ticketing-queue` |
 | Status "Gagal" di email log | Cek detail error di email log. Perbaiki `MAIL_*`, `php artisan config:cache`, `php artisan queue:restart`, lalu **Kirim ulang** |
 | Tiket "selesai" tidak pernah tertutup otomatis | Cron `schedule:run` belum dipasang |
 | `could not find driver` | Aktifkan ekstensi `pdo_pgsql` dan `pgsql` di `php.ini` |
 | Halaman 419 atau "Halaman terlalu lama dibuka" | Session habis (120 menit). Isian form tetap tersimpan, cukup kirim ulang |
 | Link tracking di email "tidak berlaku" | Link lewat 30 hari atau `APP_KEY` berubah. Pemohon bisa meminta link baru di `/lacak` |
-| Pemohon sering kena "Terlalu banyak percobaan" | Server di balik proxy tanpa `trustProxies`, lihat bagian Deploy |
-| CSS/JS lama masih tampil | Naikkan `APP_ASSET_VERSION`, lalu `php artisan config:cache` |
+| Pemohon sering kena "Terlalu banyak percobaan" | `TRUSTED_PROXIES` belum diisi, lihat DEPLOY.md langkah 8 |
+| CSS/JS lama masih tampil | Lokal: naikkan `APP_ASSET_VERSION`. Production: otomatis per commit |

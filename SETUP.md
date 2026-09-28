@@ -6,7 +6,7 @@ Ikuti berurutan. Di Mac/Linux perintahnya sama, hanya lokasi folder dan cara mem
 
 | Alat | Versi | Cek |
 | --- | --- | --- |
-| PHP | 8.2 atau lebih baru | `php -v` |
+| PHP | 8.4 atau lebih baru | `php -v` |
 | Composer | 2.x | `composer -V` |
 | PostgreSQL | 16 (minimal 15) | `psql --version` |
 | Node.js | LTS | `node -v` (untuk memasang taste-skill) |

@@ -1,0 +1,102 @@
+# CI: setiap push dan pull request → pint, phpstan, test (PostgreSQL).
+# CD: push ke main yang lolos CI → deploy ke https://ticketing.alita.id lewat self-hosted runner di server
+#     10.0.5.186 (label "ticketing"). Server ada di jaringan internal, jadi runner yang menarik job dari GitHub;
+#     tidak perlu membuka SSH ke internet. Setup runner: DEPLOY.md.
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: # Actions → CI/CD → Run workflow (main) untuk deploy ulang
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: alita
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: alita_helpdesk_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U alita"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USERNAME: alita
+      DB_PASSWORD: secret
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, pgsql, mbstring, intl, fileinfo, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Prepare .env
+        run: cp .env.example .env && php artisan key:generate --ansi
+
+      - name: Pint
+        run: vendor/bin/pint --test
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: Tests
+        run: php artisan test
+
+  deploy:
+    name: Deploy production
+    needs: test
+    # Hanya main di repo ini. Pull request (termasuk dari fork) tidak pernah menjalankan job di server.
+    if: github.repository == 'Rioagusto1808/it-helpdesk-alita' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: [self-hosted, ticketing]
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://ticketing.alita.id
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy
+        run: bash deploy/deploy.sh
+        env:
+          APP_DIR: /var/www/ticketing
+          PHP_BIN: /usr/bin/php8.4
+          HEALTH_URL: http://127.0.0.1/up
+          HEALTH_HOST: ticketing.alita.id

@@ -1,0 +1,19 @@
+# /etc/systemd/system/ticketing-queue.service
+# Pengirim email tiket. Tanpa service ini email hanya menumpuk di tabel jobs.
+#   sudo systemctl enable --now ticketing-queue
+[Unit]
+Description=IT Helpdesk Alita queue worker
+After=network.target postgresql.service
+
+[Service]
+User=www-data
+Group=www-data
+UMask=0002
+# Symlink "current" dibaca ulang setiap worker dinyalakan; deploy.sh memanggil queue:restart.
+WorkingDirectory=/var/www/ticketing/current
+ExecStart=/usr/bin/php8.4 artisan queue:work --tries=3 --backoff=60 --sleep=3 --max-time=3600
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
