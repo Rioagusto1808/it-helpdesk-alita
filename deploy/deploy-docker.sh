@@ -61,15 +61,18 @@ docker compose exec -T app php artisan optimize
 
 log "Memulai web (Nginx port 8088), queue worker, dan scheduler..."
 docker compose up -d web queue scheduler
+# Restart web agar Nginx selalu me-resolve IP baru dari container app
+docker compose restart web
 
 log "Memeriksa health check di $HEALTH_URL (Host: $HEALTH_HOST)..."
 healthy=false
-for _ in 1 2 3 4 5; do
-    if curl -fsS --max-time 10 -H "Host: $HEALTH_HOST" "$HEALTH_URL" >/dev/null; then
+for attempt in $(seq 1 10); do
+    echo "Pengecekan health check (percobaan $attempt/10)..."
+    if curl -fsS --max-time 5 -H "Host: $HEALTH_HOST" "$HEALTH_URL" >/dev/null 2>&1; then
         healthy=true
         break
     fi
-    sleep 3
+    sleep 2
 done
 
 if [ "$healthy" != true ]; then
