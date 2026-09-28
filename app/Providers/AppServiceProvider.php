@@ -27,10 +27,6 @@ class AppServiceProvider extends ServiceProvider
         Model::preventLazyLoading($strict);
         Model::preventSilentlyDiscardingAttributes($strict);
 
-        if ($this->app->isProduction()) {
-            URL::forceScheme('https');
-        }
-
         View::composer('layouts.admin', function (ViewContract $view): void {
             $user = auth()->user();
             $view->with('menu', $user instanceof User ? AdminMenu::for($user) : []);
