@@ -16,10 +16,14 @@ class TicketStatusEnumTest extends TestCase
     {
         return [
             'baru → diproses' => [TicketStatus::Baru, TicketStatus::Diproses],
+            'baru → selesai' => [TicketStatus::Baru, TicketStatus::Selesai],
             'baru → dibatalkan' => [TicketStatus::Baru, TicketStatus::Dibatalkan],
             'diproses → menunggu' => [TicketStatus::Diproses, TicketStatus::Menunggu],
-            'menunggu → diproses' => [TicketStatus::Menunggu, TicketStatus::Diproses],
             'diproses → selesai' => [TicketStatus::Diproses, TicketStatus::Selesai],
+            'diproses → dibatalkan' => [TicketStatus::Diproses, TicketStatus::Dibatalkan],
+            'menunggu → diproses' => [TicketStatus::Menunggu, TicketStatus::Diproses],
+            'menunggu → selesai' => [TicketStatus::Menunggu, TicketStatus::Selesai],
+            'menunggu → dibatalkan' => [TicketStatus::Menunggu, TicketStatus::Dibatalkan],
             'selesai → diproses' => [TicketStatus::Selesai, TicketStatus::Diproses],
             'selesai → ditutup' => [TicketStatus::Selesai, TicketStatus::Ditutup],
         ];

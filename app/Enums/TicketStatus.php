@@ -17,9 +17,9 @@ enum TicketStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::Baru => [self::Diproses, self::Dibatalkan],
-            self::Diproses => [self::Menunggu, self::Selesai],
-            self::Menunggu => [self::Diproses],
+            self::Baru => [self::Diproses, self::Selesai, self::Dibatalkan],
+            self::Diproses => [self::Menunggu, self::Selesai, self::Dibatalkan],
+            self::Menunggu => [self::Diproses, self::Selesai, self::Dibatalkan],
             self::Selesai => [self::Diproses, self::Ditutup],
             self::Ditutup, self::Dibatalkan => [],
         };
@@ -45,6 +45,22 @@ enum TicketStatus: string
     public function isFinal(): bool
     {
         return $this->allowedTransitions() === [];
+    }
+
+    /**
+     * Pilihan di modal balasan tim IT: on progress, done, reject.
+     *
+     * @return list<self>
+     */
+    public static function responses(): array
+    {
+        return [self::Diproses, self::Selesai, self::Dibatalkan];
+    }
+
+    /** Label pilihan di modal balasan; "Dibatalkan" oleh tim IT berarti tiket ditolak. */
+    public function responseLabel(): string
+    {
+        return $this === self::Dibatalkan ? 'Ditolak' : $this->label();
     }
 
     /**

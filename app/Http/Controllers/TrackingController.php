@@ -20,6 +20,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -72,7 +73,11 @@ final class TrackingController extends Controller
 
     public function cancel(Request $request, Ticket $ticket, ChangeTicketStatus $changeStatus): RedirectResponse
     {
-        // Transisi di enum hanya mengizinkan baru → dibatalkan, jadi batal di status lain otomatis ditolak.
+        // Pemohon hanya boleh membatalkan tiket yang belum diproses (tim IT boleh menolak di status lain).
+        if ($ticket->status !== TicketStatus::Baru) {
+            throw ValidationException::withMessages(['status' => 'Tiket yang sudah diproses tidak bisa dibatalkan.']);
+        }
+
         $changeStatus->handle($ticket, TicketStatus::Dibatalkan, null, 'Dibatalkan oleh pemohon', AuthorType::Requester->label());
 
         return redirect()->to(TrackingUrl::make($ticket, expires: $this->expires($request)))->with('toast', 'Tiket dibatalkan.');

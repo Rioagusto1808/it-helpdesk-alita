@@ -20,8 +20,9 @@ final class ChangeTicketStatus
     /**
      * $actor null = pemohon atau sistem; sebutkan lewat $actorLabel.
      * Catatan wajib (menunggu/selesai/dibatalkan) hanya berlaku untuk tim IT; pemohon dan sistem tidak mengisi catatan.
+     * $notify false: pemanggil (RespondToTicket) mengirim sendiri balasan berisi alasannya ke pemohon.
      */
-    public function handle(Ticket $ticket, TicketStatus $to, ?User $actor, ?string $note = null, ?string $actorLabel = null): Ticket
+    public function handle(Ticket $ticket, TicketStatus $to, ?User $actor, ?string $note = null, ?string $actorLabel = null, bool $notify = true): Ticket
     {
         $from = $ticket->status;
 
@@ -31,11 +32,11 @@ final class ChangeTicketStatus
             ]);
         }
 
-        if ($actor && $to->requiresNote() && blank($note)) {
+        if ($actor && $notify && $to->requiresNote() && blank($note)) {
             throw ValidationException::withMessages(['note' => 'Catatan wajib diisi untuk status ini.']);
         }
 
-        return DB::transaction(function () use ($ticket, $from, $to, $actor, $note, $actorLabel): Ticket {
+        return DB::transaction(function () use ($ticket, $from, $to, $actor, $note, $actorLabel, $notify): Ticket {
             $label = $actorLabel ?? $actor->name ?? AuthorType::System->label();
 
             $ticket->forceFill([
@@ -62,7 +63,7 @@ final class ChangeTicketStatus
             ActivityLog::record('ticket.status_changed', $ticket, ['from' => $from->value, 'to' => $to->value], $actor, $label);
 
             // Pemohon tidak perlu diberi tahu perubahan yang ia picu sendiri (balas/batal).
-            if ($label !== AuthorType::Requester->label()) {
+            if ($notify && $label !== AuthorType::Requester->label()) {
                 DB::afterCommit(fn () => $this->notifier->statusChanged($ticket, $from, $note));
             }
 

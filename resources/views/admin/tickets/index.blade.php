@@ -2,6 +2,10 @@
 
 @section('title', 'Tiket')
 
+@push('scripts')
+    <script src="{{ asset('js/ticket-respond.js') }}?v={{ config('app.asset_version') }}" defer></script>
+@endpush
+
 @section('content')
 <header class="admin-head admin-head--row">
     <div>
@@ -13,7 +17,7 @@
     @endcan
 </header>
 
-<details class="filters" open data-collapse-mobile>
+<details class="filters" @if (collect(request()->except('page'))->filter()->isNotEmpty()) open @endif data-collapse-mobile>
     <summary class="filters-toggle"><x-icon name="filter" class="icon--sm" /> Filter dan urutan</summary>
     <form class="filters-form" method="GET" action="{{ route('admin.tickets.index') }}">
         <div class="filters-search">
@@ -112,43 +116,48 @@
 </details>
 
 <div class="table-card">
-    <table class="ticket-table">
-        <caption class="sr-only">Daftar tiket</caption>
+    <table class="ticket-table ticket-table--list">
+        <caption class="sr-only">Daftar tiket. Pilih nomor tiket untuk membalas.</caption>
         <thead>
             <tr>
-                <th scope="col">Nomor</th>
+                <th scope="col">Tiket</th>
                 <th scope="col">Pemohon</th>
-                <th scope="col">Kategori · layanan/modul</th>
-                <th scope="col">Prioritas</th>
                 <th scope="col">Status</th>
+                <th scope="col">Prioritas</th>
                 <th scope="col">Petugas</th>
                 <th scope="col">Masuk</th>
-                <th scope="col">Aktivitas terakhir</th>
+                <th scope="col"><span class="sr-only">Aksi</span></th>
             </tr>
         </thead>
         <tbody>
             @forelse ($tickets as $ticket)
-                <tr class="trow">
+                <tr class="trow" data-ticket-id="{{ $ticket->id }}" data-ticket="{{ json_encode($respondData[$ticket->id], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}">
                     <td class="trow-no">
-                        <a class="trow-link" href="{{ route('admin.tickets.show', $ticket) }}">{{ $ticket->ticket_no }}</a>
-                        @if ($ticket->isOverdue())
-                            <span class="badge badge--sla badge--dot">Lewat SLA</span>
-                        @endif
+                        <a class="trow-link" href="{{ route('admin.tickets.show', $ticket) }}" data-respond>{{ $ticket->ticket_no }}</a>
+                        <span class="cell-sub">{{ $ticket->category->name }} · {{ $ticket->typeLabel() }}</span>
                     </td>
-                    <td data-label="Pemohon">{{ $ticket->requester_name }}</td>
-                    <td data-label="Jenis">
-                        <span class="cell-main">{{ $ticket->category->name }}</span>
-                        <span class="cell-sub">{{ $ticket->typeLabel() }}</span>
+                    <td data-label="Pemohon">
+                        <span class="cell-main">{{ $ticket->requester_name }}</span>
+                        <span class="cell-sub">{{ $ticket->requester_email }}</span>
+                    </td>
+                    <td data-label="Status">
+                        <span class="cell-stack">
+                            <x-status-badge :status="$ticket->status" :live="false" />
+                            @if ($ticket->isOverdue())
+                                <span class="badge badge--sla badge--dot">Lewat SLA</span>
+                            @endif
+                        </span>
                     </td>
                     <td data-label="Prioritas"><x-priority-badge :priority="$ticket->priority" /></td>
-                    <td data-label="Status"><x-status-badge :status="$ticket->status" :live="false" /></td>
                     <td data-label="Petugas">{{ $ticket->assignee->name ?? 'Belum ada' }}</td>
-                    <td data-label="Masuk"><time datetime="{{ $ticket->created_at?->toIso8601String() }}" title="{{ $ticket->created_at?->translatedFormat('d F Y, H.i') }}">{{ $ticket->created_at?->diffForHumans(null, true) }}</time></td>
-                    <td data-label="Aktivitas"><time datetime="{{ $ticket->last_activity_at?->toIso8601String() }}" title="{{ $ticket->last_activity_at?->translatedFormat('d F Y, H.i') }}">{{ $ticket->last_activity_at?->diffForHumans(null, true) ?? '-' }}</time></td>
+                    <td data-label="Masuk"><time datetime="{{ $ticket->created_at?->toIso8601String() }}" title="{{ $ticket->created_at?->translatedFormat('d F Y, H.i') }}">{{ $ticket->created_at?->diffForHumans() }}</time></td>
+                    <td class="cell-go" aria-hidden="true">
+                        <span class="trow-go">{{ $ticket->status->isFinal() ? 'Lihat' : 'Balas' }} <x-icon name="arrow-right" class="icon--sm" /></span>
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8">
+                    <td colspan="7">
                         <x-empty-state title="Tidak ada tiket yang cocok dengan filter ini.">
                             <a class="btn btn--secondary btn--sm" href="{{ route('admin.tickets.index') }}">Reset filter</a>
                         </x-empty-state>
@@ -160,4 +169,6 @@
 </div>
 
 {{ $tickets->links('admin._pagination') }}
+
+@include('admin.tickets._respond')
 @endsection

@@ -32,9 +32,14 @@ final class TicketController extends Controller
     public function index(TicketIndexRequest $request): View
     {
         $filters = $request->filters();
+        // Lampiran awal pemohon ditampilkan di modal balasan.
+        $tickets = $this->query($request, $filters)
+            ->with(['attachments' => fn ($q) => $q->whereNull('comment_id')])
+            ->paginate(20)->withQueryString();
 
         return view('admin.tickets.index', [
-            'tickets' => $this->query($request, $filters)->paginate(20)->withQueryString(),
+            'tickets' => $tickets,
+            'respondData' => $tickets->getCollection()->mapWithKeys(fn (Ticket $t): array => [$t->id => $this->respondData($t)]),
             'filters' => $filters,
             'options' => $this->filterOptions(),
         ]);
@@ -58,7 +63,6 @@ final class TicketController extends Controller
             'position' => QueuePosition::for($ticket),
             'timeline' => TicketTimeline::forAgent($ticket),
             'fileUrls' => $ticket->attachments->mapWithKeys(fn (TicketAttachment $a): array => [$a->id => route('admin.attachments.show', $a)]),
-            'agents' => $request->user()?->can('assign', $ticket) ? User::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']) : collect(),
         ]);
     }
 
@@ -76,6 +80,35 @@ final class TicketController extends Controller
         $deleteTicket->handle($ticket, $request->user());
 
         return to_route('admin.tickets.index')->with('toast', "Tiket {$ticket->ticket_no} dihapus.");
+    }
+
+    /**
+     * Isi modal balasan (dibaca public/js/ticket-respond.js dari atribut data-ticket).
+     *
+     * @return array<string, mixed>
+     */
+    private function respondData(Ticket $ticket): array
+    {
+        $status = $ticket->status;
+
+        return [
+            'no' => $ticket->ticket_no,
+            'type' => $ticket->category->name.' · '.$ticket->typeLabel(),
+            'requester' => $ticket->requester_name,
+            'email' => $ticket->requester_email,
+            'created' => $ticket->created_at?->translatedFormat('d M Y, H.i'),
+            'description' => $ticket->description,
+            'status' => $status->value,
+            'statusLabel' => $status->label(),
+            'badge' => $status->badgeClass(),
+            'allowed' => collect(TicketStatus::responses())
+                ->filter(fn (TicketStatus $to): bool => $to === $status || $status->canTransitionTo($to))
+                ->map(fn (TicketStatus $to): string => $to->value)->values(),
+            'final' => $status->isFinal(),
+            'action' => route('admin.tickets.respond', $ticket),
+            'detail' => route('admin.tickets.show', $ticket),
+            'files' => $ticket->attachments->map(fn (TicketAttachment $a): array => ['name' => $a->original_name, 'url' => route('admin.attachments.show', $a)])->values(),
+        ];
     }
 
     /**

@@ -24,14 +24,14 @@ final class AddComment
         private readonly TicketNotifier $notifier,
     ) {}
 
-    public function handle(Ticket $ticket, string $body, AuthorType $author, ?User $actor = null, bool $internal = false, ?UploadedFile $attachment = null): TicketComment
+    public function handle(Ticket $ticket, string $body, AuthorType $author, ?User $actor = null, bool $internal = false, ?UploadedFile $attachment = null, bool $notify = true): TicketComment
     {
         if ($ticket->status->isFinal()) {
             throw ValidationException::withMessages(['body' => 'Tiket ini sudah selesai diproses dan tidak bisa dibalas lagi.']);
         }
 
         return Attachments::storeThen($attachment, fn (?string $path): TicketComment => DB::transaction(
-            function () use ($ticket, $body, $author, $actor, $internal, $attachment, $path): TicketComment {
+            function () use ($ticket, $body, $author, $actor, $internal, $attachment, $path, $notify): TicketComment {
                 $comment = $ticket->comments()->create([
                     'user_id' => $actor?->id,
                     'author_type' => $author,
@@ -55,8 +55,9 @@ final class AddComment
 
                 ActivityLog::record('ticket.comment_added', $ticket, ['author' => $author->value, 'internal' => $internal], $actor, $actor ? null : $author->label());
 
-                // Komentar internal tidak pernah dikirim ke pemohon.
+                // Komentar internal tidak pernah dikirim ke pemohon. $notify false: pemanggil mengirim emailnya sendiri.
                 match (true) {
+                    ! $notify => null,
                     $author === AuthorType::Requester => DB::afterCommit(fn () => $this->notifier->requesterReplied($ticket, $comment)),
                     ! $internal => DB::afterCommit(fn () => $this->notifier->commentAdded($ticket, $comment)),
                     default => null,

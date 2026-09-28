@@ -85,12 +85,12 @@ final class TicketNotifier
         };
     }
 
-    /** Hanya komentar publik agent; komentar internal tidak pernah sampai ke sini. */
-    public function commentAdded(Ticket $ticket, TicketComment $comment): void
+    /** Hanya komentar publik agent; komentar internal tidak pernah sampai ke sini. $newStatus: balasan dari modal yang ikut mengubah status. */
+    public function commentAdded(Ticket $ticket, TicketComment $comment, ?TicketStatus $newStatus = null): void
     {
-        $comment->loadMissing('user:id,name');
+        $comment->loadMissing(['user:id,name', 'attachments']);
 
-        $this->send($ticket, $ticket->requester_email, 'requester_comment', new TicketCommentMail($ticket, $comment, TrackingUrl::make($ticket)));
+        $this->send($ticket, $ticket->requester_email, 'requester_comment', new TicketCommentMail($ticket, $comment, TrackingUrl::make($ticket), $newStatus));
     }
 
     /** Ke agent yang menangani, atau semua admin jika belum di-assign. */

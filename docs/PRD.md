@@ -71,12 +71,12 @@ Stack dipilih agar bisa jalan di server kantor biasa tanpa build step frontend.
 
 | Komponen | Pilihan |
 | --- | --- |
-| Bahasa | PHP 8.2+ dengan `declare(strict_types=1);` di setiap file PHP baru |
+| Bahasa | PHP 8.4+ dengan `declare(strict_types=1);` di setiap file PHP baru |
 | Framework | Laravel 12 (boleh 11) |
 | Database | PostgreSQL 16 (minimal 15) |
 | Tampilan | Blade + CSS custom (`public/css`) + JavaScript vanilla (`public/js`), tanpa Vite/npm |
 | Font | Plus Jakarta Sans (Google Fonts) dengan fallback system-ui |
-| Queue | Driver `database`, worker dijalankan Supervisor |
+| Queue | Driver `database`, worker dijalankan systemd (lihat DEPLOY.md) |
 | Email | SMTP (Microsoft 365 / Google Workspace / server mail kantor) |
 | Scheduler | `php artisan schedule:run` via cron tiap menit |
 | Test | PHPUnit feature test bawaan Laravel, database PostgreSQL terpisah `alita_helpdesk_test` agar perilakunya sama dengan production |
@@ -336,10 +336,14 @@ Tiket mengalir dari `baru` ke `ditutup`, dan hanya perpindahan yang terdaftar di
 stateDiagram-v2
   [*] --> baru
   baru --> diproses
+  baru --> selesai
   baru --> dibatalkan
   diproses --> menunggu
   menunggu --> diproses
   diproses --> selesai
+  diproses --> dibatalkan
+  menunggu --> selesai
+  menunggu --> dibatalkan
   selesai --> diproses: pemohon membalas
   selesai --> ditutup
   ditutup --> [*]
@@ -349,10 +353,13 @@ stateDiagram-v2
 | Dari | Ke | Oleh | Catatan |
 | --- | --- | --- | --- |
 | baru | diproses | Agent/Admin | otomatis juga saat agent mengambil tiket |
-| baru | dibatalkan | Pemohon (dari halaman tracking) atau Admin | alasan wajib jika oleh admin |
+| baru | selesai | Agent/Admin (modal balasan) | deskripsi balasan wajib |
+| baru | dibatalkan | Pemohon (dari halaman tracking) atau Agent/Admin ("Ditolak") | alasan wajib jika oleh tim IT |
 | diproses | menunggu | Agent/Admin | catatan wajib: menunggu apa (pemohon, vendor, sparepart) |
 | menunggu | diproses | Agent/Admin, atau otomatis saat pemohon membalas | |
 | diproses | selesai | Agent/Admin | catatan penyelesaian wajib |
+| diproses, menunggu | dibatalkan | Agent/Admin ("Ditolak") | alasan wajib; pemohon hanya bisa membatalkan saat `baru` |
+| menunggu | selesai | Agent/Admin | catatan penyelesaian wajib |
 | selesai | diproses | Otomatis saat pemohon membalas dalam masa tunggu | |
 | selesai | ditutup | Agent/Admin, atau otomatis oleh scheduler | |
 
@@ -471,7 +478,8 @@ Panel admin memakai `layouts/admin.blade.php`: sidebar kiri (Dashboard, Tiket, L
 
 - Filter: status (default semua yang aktif), kategori, layanan/modul, prioritas, assignee (termasuk "Belum di-assign" dan "Saya"), rentang tanggal, lewat SLA.
 - Cari: nomor tiket, nama, email, isi deskripsi.
-- Kolom: Nomor, Pemohon, Kategori, Layanan/Modul, Prioritas, Status, Assignee, Masuk, Aktivitas terakhir, penanda Lewat SLA.
+- Kolom ringkas: Tiket (nomor + kategori · layanan/modul), Pemohon (nama + email), Status + penanda Lewat SLA, Prioritas, Assignee, Masuk.
+- Klik baris/nomor tiket membuka **modal balasan**: ringkasan tiket (pemohon, email, masuk, deskripsi, lampiran awal) + pilihan status Diproses / Selesai / Ditolak (= `dibatalkan`) + deskripsi wajib + lampiran opsional. Satu kirim = komentar publik + perubahan status (jika berbeda) + satu email ke pemohon dengan file terlampir (Action `RespondToTicket`). Tiket final hanya menampilkan info. Link "Riwayat lengkap" membuka halaman detail. Tanpa JavaScript, nomor tiket membuka halaman detail.
 - Urutkan: posisi antrian (default), terbaru, aktivitas terakhir, prioritas.
 - 20 baris per halaman; filter tersimpan di query string sehingga link bisa dibagikan.
 - Export CSV sesuai filter aktif (admin saja).
@@ -743,5 +751,5 @@ Semua poin di bawah sudah punya nilai default di PRD, jadi agent tetap bisa jala
 - [ ] Target SLA per prioritas sudah sesuai atau perlu diubah.
 - [ ] Lama auto-close tiket selesai (default 3 hari).
 - [ ] Siapa saja agent IT selain Rio, dan siapa admin pertama.
-- [ ] Lokasi hosting (server internal atau cloud) dan domain aplikasi, misalnya `helpdesk.alita.id`.
+- [x] Lokasi hosting dan domain: server internal 10.0.5.186 di belakang WAF Sophos, `https://ticketing.alita.id` (DEPLOY.md).
 - [ ] Kode warna oranye resmi dari brand guideline Alita (saat ini memakai `#E97537` dari theme color alita.id).

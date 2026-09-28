@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\TicketAssignmentController;
 use App\Http\Controllers\Admin\TicketCommentController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
+use App\Http\Controllers\Admin\TicketResponseController;
 use App\Http\Controllers\Admin\TicketStatusController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AttachmentController;
@@ -68,6 +69,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::post('/ambil', [TicketAssignmentController::class, 'take'])->name('take');
             Route::patch('/assign', [TicketAssignmentController::class, 'assign'])->middleware('role:admin')->name('assign');
             Route::post('/komentar', [TicketCommentController::class, 'store'])->name('comments.store');
+            Route::post('/balas', [TicketResponseController::class, 'store'])->name('respond');
             Route::post('/kirim-link', [AdminTicketController::class, 'sendLink'])->name('send-link');
         });
         Route::get('/lampiran/{attachment}', [AttachmentController::class, 'show'])->name('attachments.show');

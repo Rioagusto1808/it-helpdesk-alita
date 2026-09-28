@@ -33,10 +33,14 @@ class TicketStatusTest extends TestCase
     {
         return [
             'baru → diproses' => [TicketStatus::Baru, TicketStatus::Diproses],
+            'baru → selesai' => [TicketStatus::Baru, TicketStatus::Selesai],
             'baru → dibatalkan' => [TicketStatus::Baru, TicketStatus::Dibatalkan],
             'diproses → menunggu' => [TicketStatus::Diproses, TicketStatus::Menunggu],
-            'menunggu → diproses' => [TicketStatus::Menunggu, TicketStatus::Diproses],
             'diproses → selesai' => [TicketStatus::Diproses, TicketStatus::Selesai],
+            'diproses → dibatalkan' => [TicketStatus::Diproses, TicketStatus::Dibatalkan],
+            'menunggu → diproses' => [TicketStatus::Menunggu, TicketStatus::Diproses],
+            'menunggu → selesai' => [TicketStatus::Menunggu, TicketStatus::Selesai],
+            'menunggu → dibatalkan' => [TicketStatus::Menunggu, TicketStatus::Dibatalkan],
             'selesai → diproses' => [TicketStatus::Selesai, TicketStatus::Diproses],
             'selesai → ditutup' => [TicketStatus::Selesai, TicketStatus::Ditutup],
         ];
@@ -64,7 +68,7 @@ class TicketStatusTest extends TestCase
     {
         $ticket = Ticket::factory()->status(TicketStatus::Baru)->create();
 
-        foreach ([TicketStatus::Selesai, TicketStatus::Ditutup, TicketStatus::Menunggu] as $to) {
+        foreach ([TicketStatus::Ditutup, TicketStatus::Menunggu] as $to) {
             $this->actingAs($this->agent)
                 ->patch(route('admin.tickets.status', $ticket), ['status' => $to->value, 'note' => 'x'])
                 ->assertSessionHasErrors('status');
