@@ -93,10 +93,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy
-        run: bash deploy/deploy.sh
+      - name: Deploy with Docker Compose
+        run: bash deploy/deploy-docker.sh
         env:
           APP_DIR: /var/www/ticketing
-          PHP_BIN: /usr/bin/php8.4
-          HEALTH_URL: http://127.0.0.1/up
+          HEALTH_URL: http://127.0.0.1:8088/up
           HEALTH_HOST: ticketing.alita.id
