@@ -21,7 +21,7 @@ if [ "$SRC" != "$APP_DIR" ]; then
     mkdir -p "$APP_DIR"
     rsync -a --delete \
         --exclude=.git --exclude=.github --exclude=tests --exclude=docs \
-        --exclude=vendor --exclude=node_modules --exclude=storage --exclude=.env \
+        --exclude=vendor --exclude=node_modules --exclude=storage --exclude=.env --exclude=certs \
         "$SRC/" "$APP_DIR/"
 fi
 
