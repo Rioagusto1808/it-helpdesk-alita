@@ -20,9 +20,11 @@ services:
     restart: always
     ports:
       - "0.0.0.0:8088:80"
+      - "0.0.0.0:8443:443"
     volumes:
       - .:/var/www/html:ro
       - ./deploy/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
     networks:
       - ticketing_net
     depends_on:
